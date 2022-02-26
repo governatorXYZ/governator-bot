@@ -35,7 +35,6 @@
     "dependencies": {
         "@logdna/logger": "^2.6.0",
         "@sentry/integrations": "^6.16.1",
-        "@sentry/node": "^6.16.1",
         "@sentry/tracing": "^6.16.1",
         "@types/node": "^16.7.1",
         "dayjs": "^1.10.7",
@@ -43,6 +42,7 @@
         "discord.js": "^13.6.0",
         "dotenv": "^14.2.0",
         "form-data": "^4.0.0",
+        "loglevel": "^1.8.0",
         "mongodb": "^4.3.0",
         "p-queue": "^6.6.2",
         "slash-create": "^5.0.3",

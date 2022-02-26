@@ -1,32 +1,33 @@
-import logdna, { Logger, LogOptions } from '@logdna/logger';
-import apiKeys from '../service/constants/apiKeys';
+// import logdna, { Logger, LogOptions } from '@logdna/logger';
+// import apiKeys from '../service/constants/apiKeys';
 import { CommandContext } from 'slash-create';
-import * as Sentry from '@sentry/node';
+// import * as Sentry from '@sentry/node';
+import * as logger from 'loglevel';
 
-let logger: Logger;
+// let logger: Logger;
 
-try {
-	logger = logdna.createLogger(apiKeys.logDNAToken, {
-		app: apiKeys.logDNAAppName,
-		level: apiKeys.logDNADefault,
-	});
-	if (process.env.NODE_ENV != 'production' || !logger.info) {
-		// eslint-disable-next-line no-console
-		console.log('Logger initialized!');
-	} else {
-		logger.log('Logger initialized!');
-	}
-} catch (e) {
-	// eslint-disable-next-line no-console
-	console.log('Please setup LogDNA token.');
-	// eslint-disable-next-line no-console
-	console.log(e);
-	throw new Error();
-}
+// try {
+// 	// logger = logdna.createLogger(apiKeys.logDNAToken, {
+// 	// 	app: apiKeys.logDNAAppName,
+// 	// 	level: apiKeys.logDNADefault,
+// 	// });
+// 	if (process.env.NODE_ENV != 'production' || !logger.info) {
+// 		// eslint-disable-next-line no-console
+// 		console.log('Logger initialized!');
+// 	} else {
+// 		logger.log('Logger initialized!');
+// 	}
+// } catch (e) {
+// 	// eslint-disable-next-line no-console
+// 	console.log('Please setup LogDNA token.');
+// 	// eslint-disable-next-line no-console
+// 	console.log(e);
+// 	throw new Error();
+// }
 
 const Log = {
 	
-	info(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
+	info(statement: string | any, options?): void {
 		if (process.env.NODE_ENV != 'production' || !logger.info) {
 			// eslint-disable-next-line no-console
 			console.log(statement);
@@ -35,7 +36,7 @@ const Log = {
 		}
 	},
 	
-	warn(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
+	warn(statement: string | any, options?): void {
 		if (process.env.NODE_ENV != 'production' || !logger.warn) {
 			// eslint-disable-next-line no-console
 			console.log(statement);
@@ -44,7 +45,7 @@ const Log = {
 		}
 	},
 	
-	debug(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
+	debug(statement: string | any, options?): void {
 		if (process.env.NODE_ENV != 'production' || !logger.debug) {
 			// eslint-disable-next-line no-console
 			console.debug(statement);
@@ -53,7 +54,7 @@ const Log = {
 		}
 	},
 	
-	error(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
+	error(statement: string | any, options?): void {
 		if (process.env.NODE_ENV != 'production' || !logger.error) {
 			// eslint-disable-next-line no-console
 			console.error(statement);
@@ -62,16 +63,16 @@ const Log = {
 		}
 	},
 	
-	fatal(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
-		if (process.env.NODE_ENV != 'production' || !logger.fatal) {
-			// eslint-disable-next-line no-console
-			console.error(statement);
-		} else {
-			logger.fatal(statement, options);
-		}
-	},
+	// fatal(statement: string | any, options?): void {
+	// 	if (process.env.NODE_ENV != 'production' || !logger.fatal) {
+	// 		// eslint-disable-next-line no-console
+	// 		console.error(statement);
+	// 	} else {
+	// 		logger.fatal(statement, options);
+	// 	}
+	// },
 	
-	trace(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
+	trace(statement: string | any, options?): void {
 		if (process.env.NODE_ENV != 'production' || !logger.trace) {
 			// eslint-disable-next-line no-console
 			console.log(statement);
@@ -80,7 +81,7 @@ const Log = {
 		}
 	},
 	
-	log(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
+	log(statement: string | any, options?): void {
 		if (process.env.NODE_ENV != 'production') {
 			// eslint-disable-next-line no-console
 			console.log(statement);
@@ -88,18 +89,18 @@ const Log = {
 		logger.log(statement, options);
 	},
 	
-	// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-	addMetaProperty(key: string, value: any): void {
-		logger.addMetaProperty(key, value);
-	},
+	// // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+	// addMetaProperty(key: string, value: any): void {
+	// 	logger.addMetaProperty(key, value);
+	// },
 	
-	removeMetaProperty(key: string): void {
-		logger.removeMetaProperty(key);
-	},
+	// removeMetaProperty(key: string): void {
+	// 	logger.removeMetaProperty(key);
+	// },
 	
-	flush(): void {
-		logger.flush();
-	},
+	// flush(): void {
+	// 	logger.flush();
+	// },
 };
 
 export const LogUtils = {
@@ -130,11 +131,11 @@ export const LogUtils = {
 	logError(message: string, error: Error | any, guildId?: string): void {
 		try {
 			if (error != null && error instanceof Error) {
-				Sentry.captureException(error, {
-					tags: {
-						guildId: guildId,
-					},
-				});
+				// Sentry.captureException(error, {
+				// 	tags: {
+				// 		guildId: guildId,
+				// 	},
+				// });
 				Log.error(message, {
 					indexMeta: true,
 					meta: {

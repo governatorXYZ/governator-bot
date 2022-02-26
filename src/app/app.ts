@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/node';
+// import * as Sentry from '@sentry/node';
 import { SlashCreator, GatewayServer, SlashCommand, CommandContext } from 'slash-create';
 import Discord, { Client, ClientOptions, Intents, WSEventType } from 'discord.js';
 import path from 'path';
@@ -6,9 +6,9 @@ import fs from 'fs';
 import Log, { LogUtils } from './utils/Log';
 import apiKeys from './service/constants/apiKeys';
 import constants from './service/constants/constants';
-import { RewriteFrames } from '@sentry/integrations';
+// import { RewriteFrames } from '@sentry/integrations';
 
-initializeSentryIO();
+// initializeSentryIO();
 const client: Client = initializeClient();
 initializeEvents();
 
@@ -94,19 +94,19 @@ function initializeEvents(): void {
 	});
 }
 
-function initializeSentryIO() {
-	Sentry.init({
-		dsn: `${apiKeys.sentryDSN}`,
-		tracesSampleRate: 1.0,
-		release: `${constants.APP_NAME}@${constants.APP_VERSION}`,
-		environment: `${process.env.SENTRY_ENVIRONMENT}`,
-		integrations: [
-			new RewriteFrames({
-				root: __dirname,
-			}),
-			new Sentry.Integrations.Http({ tracing: true }),
-		],
-	});
-}
+// function initializeSentryIO() {
+// 	Sentry.init({
+// 		dsn: `${apiKeys.sentryDSN}`,
+// 		tracesSampleRate: 1.0,
+// 		release: `${constants.APP_NAME}@${constants.APP_VERSION}`,
+// 		environment: `${process.env.SENTRY_ENVIRONMENT}`,
+// 		integrations: [
+// 			new RewriteFrames({
+// 				root: __dirname,
+// 			}),
+// 			new Sentry.Integrations.Http({ tracing: true }),
+// 		],
+// 	});
+// }
 
 export default client;

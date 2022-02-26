@@ -853,17 +853,6 @@
   resolved "https://registry.yarnpkg.com/@sapphire/async-queue/-/async-queue-1.1.9.tgz#ce69611c8753c4affd905a7ef43061c7eb95c01b"
   integrity sha512-CbXaGwwlEMq+l1TRu01FJCvySJ1CEFKFclHT48nIfNeZXaAAmmwwy7scUKmYHPUa3GhoMp6Qr1B3eAJux6XgOQ==
 
-"@sentry/core@6.16.1":
-  version "6.16.1"
-  resolved "https://registry.yarnpkg.com/@sentry/core/-/core-6.16.1.tgz#d9f7a75f641acaddf21b6aafa7a32e142f68f17c"
-  integrity sha512-UFI0264CPUc5cR1zJH+S2UPOANpm6dLJOnsvnIGTjsrwzR0h8Hdl6rC2R/GPq+WNbnipo9hkiIwDlqbqvIU5vw==
-  dependencies:
-    "@sentry/hub" "6.16.1"
-    "@sentry/minimal" "6.16.1"
-    "@sentry/types" "6.16.1"
-    "@sentry/utils" "6.16.1"
-    tslib "^1.9.3"
-
 "@sentry/hub@6.16.1":
   version "6.16.1"
   resolved "https://registry.yarnpkg.com/@sentry/hub/-/hub-6.16.1.tgz#526e19db51f4412da8634734044c605b936a7b80"
@@ -892,22 +881,7 @@
     "@sentry/types" "6.16.1"
     tslib "^1.9.3"
 
-"@sentry/node@^6.16.1":
-  version "6.16.1"
-  resolved "https://registry.yarnpkg.com/@sentry/node/-/node-6.16.1.tgz#d92916da3e95d23e1ada274e97d6bf369e74ac51"
-  integrity sha512-SeDDoug2kUxeF1D7JGPa3h5EXxKtmA01mITBPYx5xbJ0sMksnv5I5bC1SJ8arRRzq6+W1C4IEeDBQtrVCk6ixA==
-  dependencies:
-    "@sentry/core" "6.16.1"
-    "@sentry/hub" "6.16.1"
-    "@sentry/tracing" "6.16.1"
-    "@sentry/types" "6.16.1"
-    "@sentry/utils" "6.16.1"
-    cookie "^0.4.1"
-    https-proxy-agent "^5.0.0"
-    lru_map "^0.3.3"
-    tslib "^1.9.3"
-
-"@sentry/tracing@6.16.1", "@sentry/tracing@^6.16.1":
+"@sentry/tracing@^6.16.1":
   version "6.16.1"
   resolved "https://registry.yarnpkg.com/@sentry/tracing/-/tracing-6.16.1.tgz#32fba3e07748e9a955055afd559a65996acb7d71"
   integrity sha512-MPSbqXX59P+OEeST+U2V/8Hu/8QjpTUxTNeNyTHWIbbchdcMMjDbXTS3etCgajZR6Ro+DHElOz5cdSxH6IBGlA==
@@ -1639,11 +1613,6 @@ convert-source-map@^1.4.0, convert-source-map@^1.6.0, convert-source-map@^1.7.0:
   integrity sha512-+OQdjP49zViI/6i7nIJpA8rAl4sV/JdPfU9nZs3VqOwGIgizICvuN2ru6fMd+4llL0tar18UYJXfZ/TWtmhUjA==
   dependencies:
     safe-buffer "~5.1.1"
-
-cookie@^0.4.1:
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.4.1.tgz#afd713fe26ebd21ba95ceb61f9a8116e50a537d1"
-  integrity sha512-ZwrFkGJxUR3EIoXtO+yVE69Eb7KlixbaeAWfBQB9vVsNn/o+Yw69gBWSSDK825hQNdN+wF8zELf3dFNl/kxkUA==
 
 core-util-is@~1.0.0:
   version "1.0.3"
@@ -3143,6 +3112,11 @@ lodash@^4.7.0:
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
 
+loglevel@^1.8.0:
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/loglevel/-/loglevel-1.8.0.tgz#e7ec73a57e1e7b419cb6c6ac06bf050b67356114"
+  integrity sha512-G6A/nJLRgWOuuwdNuA6koovfEV1YpqqAG4pRUlFaz3jj2QNZ8M4vBqnVA+HBTmU/AMNUtlOsMmSpF6NyOjztbA==
+
 long@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/long/-/long-4.0.0.tgz#9a7b71cfb7d361a194ea555241c92f7468d5bf28"
@@ -3154,11 +3128,6 @@ lru-cache@^6.0.0:
   integrity sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==
   dependencies:
     yallist "^4.0.0"
-
-lru_map@^0.3.3:
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/lru_map/-/lru_map-0.3.3.tgz#b5c8351b9464cbd750335a79650a0ec0e56118dd"
-  integrity sha1-tcg1G5Rky9dQM1p5ZQoOwOVhGN0=
 
 make-dir@^3.0.0, make-dir@^3.0.2:
   version "3.1.0"
