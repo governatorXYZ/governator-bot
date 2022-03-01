@@ -1,7 +1,6 @@
 import logdna, { Logger, LogOptions } from '@logdna/logger';
 import apiKeys from '../service/constants/apiKeys';
 import { CommandContext } from 'slash-create';
-import * as Sentry from '@sentry/node';
 
 let logger: Logger;
 
@@ -130,11 +129,6 @@ export const LogUtils = {
 	logError(message: string, error: Error | any, guildId?: string): void {
 		try {
 			if (error != null && error instanceof Error) {
-				Sentry.captureException(error, {
-					tags: {
-						guildId: guildId,
-					},
-				});
 				Log.error(message, {
 					indexMeta: true,
 					meta: {
