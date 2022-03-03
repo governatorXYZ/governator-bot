@@ -11,9 +11,9 @@ try {
 	});
 	if (process.env.NODE_ENV != 'production' || !logger.info) {
 		// eslint-disable-next-line no-console
-		console.log('Logger initialized!');
+		console.log('Logger initialized for development!');
 	} else {
-		logger.log('Logger initialized!');
+		logger.log('Logger initialized for production!');
 	}
 } catch (e) {
 	// eslint-disable-next-line no-console
