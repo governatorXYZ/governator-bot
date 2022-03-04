@@ -8,7 +8,7 @@ export default (): MessageOptions => {
 			fields: [
 				{
 					name: '-> /help me',
-					value: 'Display ',
+					value: 'Getting more info on governator-bot!',
 					inline: false,
 				},
 				{

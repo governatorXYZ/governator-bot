@@ -45,6 +45,8 @@ creator
 
 // Log client errors
 client.on('error', Log.error);
+// reload client
+client.destroy();
 
 client.login(process.env.DISCORD_BOT_TOKEN);
 
