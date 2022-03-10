@@ -2,7 +2,7 @@ import { ButtonStyle, MessageOptions, ComponentType } from 'slash-create';
 
 export default (): MessageOptions => {
 	return {
-		content: 'Press pick one of the following option!',
+		content: 'Press pick one of the following energy option!',
 		components: [
 			{
 				type: ComponentType.ACTION_ROW,
@@ -18,6 +18,7 @@ export default (): MessageOptions => {
 						custom_id: 'Gas',
 						style: ButtonStyle.SECONDARY,
 						label: 'Gas',
+						// emoji: { 'name': 'Gas', 'id': '123456789012345678' },
 					},
 					{
 						type: ComponentType.BUTTON,
