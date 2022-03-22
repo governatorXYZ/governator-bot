@@ -3,11 +3,18 @@ import Discord, { Client, ClientOptions, Intents, WSEventType } from 'discord.js
 import path from 'path';
 import fs from 'fs';
 import Log, { LogUtils } from './utils/Log';
-import apiKeys from './service/constants/apiKeys';
 import constants from './service/constants/constants';
+import NodeEventSource from 'eventsource';
+const onSSEMessage = require('./service/sse');
 
 const client: Client = initializeClient();
 initializeEvents();
+
+const evtSource = new NodeEventSource(
+	constants.SSE_URL,
+	// eventSourceInitDict,
+);
+onSSEMessage(evtSource, client);
 
 const creator = new SlashCreator({
 	applicationID: process.env.DISCORD_BOT_APPLICATION_ID,

@@ -4,5 +4,6 @@ export default Object.freeze({
 	DB_NAME_DEGEN: 'db-name',
 	
 	MONGODB_URI_PARTIAL: `${process.env.MONGODB_PREFIX}://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASS}@${process.env.MONGODB_CLUSTER}/`,
+	SSE_URL:'http://localhost:3000/governator/sse',
 	
 });
