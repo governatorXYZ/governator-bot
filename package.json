@@ -40,6 +40,7 @@
         "dd-trace": "^1.5.1",
         "discord.js": "^13.6.0",
         "dotenv": "^14.2.0",
+        "eventsource": "^2.0.0",
         "form-data": "^4.0.0",
         "mongodb": "^4.3.0",
         "p-queue": "^6.6.2",
