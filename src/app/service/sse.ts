@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import Discord, { Client, TextChannel, MessageEmbed } from 'discord.js';
 import NodeEventSource from 'eventsource';
 
@@ -6,31 +7,30 @@ const EmojiList = [
 	'🇯', '🇰', '🇱', '🇲', '🇳', '🇴', '🇵', '🇶', '🇷',
 	'🇸', '🇹', '🇺', '🇻', '🇼', '🇽', '🇾', '🇿',
 ];
-const TextList = [
-	'Monday', 'Tuesday', 'Wednesday', 'Thursday',
-	'Friday', 'Saturday', 'Sunday',
-];
 
 const emojiInfo = {};
-const MAX_REACTIONS = 3;
-module.exports = (evtSource: NodeEventSource, client: Client, title = 'testing') => {
+const MAX_REACTIONS = 10;
+module.exports = (evtSource: NodeEventSource, client: Client) => {
 	evtSource.onmessage = async ({ data, lastEventId }) => {
-		let text = '*To vote, react using the correspoding emoji.*\n\n';
 		const message = JSON.parse(data);
 		// eslint-disable-next-line no-console
 		console.log('New message', message, lastEventId);
-		const dest = client.channels.cache.get('926253526768828527') as TextChannel;
-		// dest.send('New message');
-		// const options = (['jerry', 'tom', 'pluto', 'micky', 'mini'] as const).filter(e => [e]);
-		// pollEmbed(dest, 'Test poll', options);
-		parseJSON(message);
-		TextList.forEach((option: any, index: number) =>{
+		const title = message.title;
+		console.log('title:', title);
+		const channel_id = message.channel_id;
+		console.log('channel_id:', channel_id);
+		const poll_options = message.poll_options;
+		const dest = client.channels.cache.get(channel_id) as TextChannel;
+		const polls = [];
+		poll_options.forEach((option: any, index: number) =>{
 			emojiInfo[EmojiList[index]] = { option: EmojiList[index], votes: 0 };
+			polls.push(option.Name);
 		});
+		console.log('polls:', polls);
 		const usedEmojis = Object.keys(emojiInfo);
 		// eslint-disable-next-line no-console
 		console.log('usedEmojis', JSON.stringify(usedEmojis));
-		const poll = await dest.send({ embeds: [ helpEmbed(title) ] });
+		const poll = await dest.send({ embeds: [ helpEmbed(title, polls) ] });
 		for (const emoji of usedEmojis) await poll.react(emoji);
 
 		const filter = (reaction, user) => usedEmojis.includes(reaction.emoji.name) && !user.bot;
@@ -45,15 +45,35 @@ module.exports = (evtSource: NodeEventSource, client: Client, title = 'testing')
 			if (usedEmojis.includes(reaction.emoji.name)) {
 				if (!voterInfo.has(user.id)) voterInfo.set(user.id, { emoji: reaction.emoji.name });
 				const votedEmoji = voterInfo.get(user.id).emoji;
+				// new vote
 				if (votedEmoji !== reaction.emoji.name) {
+					// FIXME:the current version of ReactionManager does not have Property 'get' anymore
 					// const lastVote = poll.reactions.get(votedEmoji);
 					const lastVote = reaction;
 					lastVote.count -= 1;
 					lastVote.users.remove(user.id);
-					emojiInfo[votedEmoji].votes -= 1;
+					if (emojiInfo[votedEmoji].votes > 0) {
+						emojiInfo[votedEmoji].votes -= 1;
+					}
 					voterInfo.set(user.id, { emoji: reaction.emoji.name });
+					console.log('>votedEmoji:', votedEmoji);
+					console.log('>reaction.emoji.name:', reaction.emoji.name);
+					console.log(`>${reaction.emoji.name} votes:`, emojiInfo[reaction.emoji.name].votes);
+				} else {
+					if (emojiInfo[votedEmoji].votes > 0) {
+						emojiInfo[votedEmoji].votes -= 1;
+					}
 				}
 				emojiInfo[reaction.emoji.name].votes += 1;
+				console.log('user.id:', user.id);
+				console.log('votedEmoji:', votedEmoji);
+				console.log('reaction.emoji.name:', reaction.emoji.name);
+				console.log(`${votedEmoji} old votes:`, emojiInfo[votedEmoji].votes);
+				console.log(`${reaction.emoji.name} new votes:`, emojiInfo[reaction.emoji.name].votes);
+
+			} else {
+				// Add new emoji not on the list, ignore it for now.
+				console.log('ignore new emoji:', reaction.emoji.name);
 			}
 		});
 
@@ -65,26 +85,19 @@ module.exports = (evtSource: NodeEventSource, client: Client, title = 'testing')
 		});
 	
 		reactionCollector.on('end', () => {
-			text = '*Ding! Ding! Ding! Time\'s up!\n Results are in,*\n\n';
+			let text = '*Ding! Ding! Ding! Time\'s up!\n Results are in,*\n\n';
 			for (const emoji in emojiInfo) text += `\`${emojiInfo[emoji].option}\` - \`${emojiInfo[emoji].votes}\`\n\n`;
 			poll.delete();
-			dest.send({ embeds: [ helpEmbed(title).setDescription(text) ] });
+			dest.send({ embeds: [ helpEmbed(title, polls).setDescription(text) ] });
 		});
 
 	};
 };
 
-function parseJSON(data:JSON) {
-	for(const name in data) {
-		// eslint-disable-next-line no-console
-		console.log(name + ': ' + data[name]);
-	}
-}
-
-function helpEmbed(title): MessageEmbed {
+function helpEmbed(title, polls): MessageEmbed {
 	const msgEmbed = new Discord.MessageEmbed().setTitle(`GovBot\'s Poll - ${title}`);
-	TextList.forEach((option: any, index: number) =>{
-		msgEmbed.addField(option, `${EmojiList[index]} : ${TextList[index]}\n`);
+	polls.forEach((option: any, index: number) =>{
+		msgEmbed.addField(option, `${EmojiList[index]} : ${option}\n`);
 	});
 
 	return msgEmbed;
