@@ -11,10 +11,10 @@ const EmojiList = [
 const emojiInfo = {};
 const MAX_REACTIONS = 10;
 module.exports = (evtSource: NodeEventSource, client: Client) => {
-	evtSource.onmessage = async ({ data, lastEventId }) => {
-		const message = JSON.parse(data);
+	evtSource.addEventListener("POLL_CREATE", function(event) {
+		const message = JSON.parse(event.data);
 		// eslint-disable-next-line no-console
-		console.log('New message', message, lastEventId);
+		console.log('New message', message);
 		const title = message.title;
 		console.log('title:', title);
 		const channel_id = message.channel_id;
@@ -91,7 +91,7 @@ module.exports = (evtSource: NodeEventSource, client: Client) => {
 			dest.send({ embeds: [ helpEmbed(title, polls).setDescription(text) ] });
 		});
 
-	};
+	});
 };
 
 function helpEmbed(title, polls): MessageEmbed {
