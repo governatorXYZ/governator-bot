@@ -11,7 +11,7 @@ const EmojiList = [
 const emojiInfo = {};
 const MAX_REACTIONS = 10;
 module.exports = (evtSource: NodeEventSource, client: Client) => {
-	evtSource.addEventListener("POLL_CREATE", function(event) {
+	evtSource.addEventListener("POLL_CREATE", async function(event) {
 		const message = JSON.parse(event.data);
 		// eslint-disable-next-line no-console
 		console.log('New message', message);
@@ -20,7 +20,6 @@ module.exports = (evtSource: NodeEventSource, client: Client) => {
 		const channel_id = message.channel_id;
 		console.log('channel_id:', channel_id);
 		const poll_options = message.poll_options;
-		const dest = client.channels.cache.get(channel_id) as TextChannel;
 		const polls = [];
 		poll_options.forEach((option: any, index: number) =>{
 			emojiInfo[EmojiList[index]] = { option: EmojiList[index], votes: 0 };
@@ -30,7 +29,10 @@ module.exports = (evtSource: NodeEventSource, client: Client) => {
 		const usedEmojis = Object.keys(emojiInfo);
 		// eslint-disable-next-line no-console
 		console.log('usedEmojis', JSON.stringify(usedEmojis));
-		const poll = await dest.send({ embeds: [ helpEmbed(title, polls) ] });
+		const dest = client.channels.cache.get(channel_id) as TextChannel;
+		const msgEmbed = helpEmbed(title, polls);
+		console.log('msgEmbed', JSON.stringify(msgEmbed));
+		const poll = await dest.send({ embeds: [ msgEmbed ] });
 		for (const emoji of usedEmojis) await poll.react(emoji);
 
 		const filter = (reaction, user) => usedEmojis.includes(reaction.emoji.name) && !user.bot;
