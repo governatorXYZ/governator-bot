@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import Discord, { Client, TextChannel, MessageEmbed } from 'discord.js';
+import Discord, { Client, TextChannel, MessageEmbed, MessageActionRow, MessageButton } from 'discord.js';
 import NodeEventSource from 'eventsource';
 
 const emojiInfo = {};
@@ -26,11 +26,21 @@ module.exports = (evtSource: NodeEventSource, client: Client) => {
 		const usedEmojis = Object.keys(emojiInfo);
 		// eslint-disable-next-line no-console
 		console.log('usedEmojis', JSON.stringify(usedEmojis));
+		const row = new MessageActionRow();
+
 		const dest = await client.channels.fetch(channel_id) as TextChannel;
 		const msgEmbed = helpEmbed(title, polls, EmojiList, poll._id);
+		polls.forEach((option: any, index: number) =>{
+			row.addComponents(
+				new MessageButton()
+					.setCustomId(`${index}`)
+					.setLabel(`${EmojiList[index]}`)
+					.setStyle('PRIMARY'),
+			);
+		});
+
 		console.log('msgEmbed', JSON.stringify(msgEmbed));
-		const message = await dest.send({ embeds: [ msgEmbed ] });
-		for (const emoji of usedEmojis) await message.react(emoji);
+		await dest.send({ embeds: [ msgEmbed ], components: [row] });
 	});
 };
 
