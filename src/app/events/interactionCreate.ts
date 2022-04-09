@@ -1,7 +1,7 @@
 import { ButtonInteraction, User } from 'discord.js';
 import { DiscordEvent } from '../types/discord/DiscordEvent';
-import Log from '../utils/Log';
-
+import { LogUtils } from '../utils/Log';
+import ButtonInteractionAddVote from './vote/ButtonInteractionAddVote';
 export default class implements DiscordEvent {
 
 	name = 'interactionCreate';
@@ -15,6 +15,8 @@ export default class implements DiscordEvent {
      */
 	async execute(reaction:ButtonInteraction): Promise<any> { 
 		if (!reaction.isButton()) return;
-		Log.info(reaction);
+		// Log.info(reaction);
+
+		await ButtonInteractionAddVote(reaction).catch(e => LogUtils.logError('failed to react to poll', e));
 	}
 }
