@@ -33,7 +33,7 @@ module.exports = (evtSource: NodeEventSource, client: Client) => {
 		polls.forEach((option: any, index: number) =>{
 			row.addComponents(
 				new MessageButton()
-					.setCustomId(`${index}`)
+					.setCustomId(`${poll._id}:${option}`)
 					.setLabel(`${EmojiList[index]}`)
 					.setStyle('PRIMARY'),
 			);
