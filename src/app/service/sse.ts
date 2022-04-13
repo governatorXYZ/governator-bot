@@ -30,7 +30,7 @@ module.exports = (evtSource: NodeEventSource, client: Client) => {
 
 		const dest = await client.channels.fetch(channel_id) as TextChannel;
 		const msgEmbed = helpEmbed(title, polls, EmojiList, poll._id);
-		polls.forEach((option: any, index: number) =>{
+		polls.forEach((option: any, index: number) => {
 			row.addComponents(
 				new MessageButton()
 					.setCustomId(`${poll._id}:${option}`)
