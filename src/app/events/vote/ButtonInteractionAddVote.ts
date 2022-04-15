@@ -6,9 +6,9 @@ export default async (reaction: ButtonInteraction): Promise<any> => {
 	const poll_info = reaction.customId;
 	const poll_id = poll_info.substring(0, poll_info.indexOf(':'));
 	const poll_option = poll_info.substring(poll_info.indexOf(':') + 1);
-	console.log('poll info ', poll_info);
-	console.log('poll ID ', poll_id);
-	console.log('poll option ', poll_option);
+	// console.log('poll info ', poll_info);
+	// console.log('poll ID ', poll_id);
+	// console.log('poll option ', poll_option);
 
 	// fetch poll from db
 	const poll = await fetchPoll(poll_id);
@@ -52,6 +52,56 @@ export default async (reaction: ButtonInteraction): Promise<any> => {
 	// otherwise, create the vote
 	const vote = await createVote(chosenOption._id, user._id, poll_id);
 
+	if (!vote) return;
+
+	// update the poll embed
+	let embed;
+	switch (vote.method) {
+	case 'create':
+		embed = updateEmbedCountPlus1(reaction.message.embeds[0], chosenOption._id);
+		break;
+	case 'delete':
+		embed = updateEmbedCountMinus1(reaction.message.embeds[0], chosenOption._id);
+		break;
+	case 'update':
+		embed = updateEmbedCountPlus1(reaction.message.embeds[0], chosenOption._id);
+		updateEmbedCountMinus1(embed, vote.data.oldVote.poll_option_id);
+		break;
+	}
+
+	const msgId = reaction.message.id;
+
+	const channel = reaction.channel;
+
+	const msg = channel.messages.cache.get(msgId);
+
+	await msg.edit({ embeds:[embed] });
+};
+
+const updateEmbedCountPlus1 = (embed, optionId) => {
+	// console.log(embed);
+	embed.fields.forEach((field: any, index: number) => {
+
+		if (field.value.substring(0, field.value.indexOf(':')).replace(/\s/g, '') === optionId) {
+
+			embed.fields[index + 1].value = (parseInt(embed.fields[index + 1].value) + 1).toString();
+		}
+	});
+	// console.log(embed);
+	return embed;
+};
+
+const updateEmbedCountMinus1 = (embed, optionId) => {
+	// console.log(embed);
+	embed.fields.forEach((field: any, index: number) => {
+
+		if (field.value.substring(0, field.value.indexOf(':')).replace(/\s/g, '') === optionId) {
+
+			embed.fields[index + 1].value = (parseInt(embed.fields[index + 1].value) - 1).toString();
+		}
+	});
+	// console.log(embed);
+	return embed;
 };
 
 // FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
