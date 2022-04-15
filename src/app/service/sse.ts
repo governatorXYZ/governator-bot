@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import Discord, { Client, TextChannel, MessageEmbed, MessageActionRow, MessageButton } from 'discord.js';
 import NodeEventSource from 'eventsource';
+import axios from "axios";
 
 const emojiInfo = {};
 module.exports = (evtSource: NodeEventSource, client: Client) => {
@@ -42,6 +43,69 @@ module.exports = (evtSource: NodeEventSource, client: Client) => {
 		console.log('msgEmbed', JSON.stringify(msgEmbed));
 		await dest.send({ embeds: [ msgEmbed ], components: [row] });
 	});
+
+	evtSource.addEventListener('REQUEST_CLIENT_DATA', async function(event) {
+		const dataRequest = JSON.parse(event.data);
+		console.log(dataRequest);
+
+		if (!(dataRequest.provider_id === 'discord')) return;
+
+		const guild = await client.guilds.fetch(dataRequest.guildId);
+		const guildChannels = await guild.channels.cache;
+
+		const channelNames = [];
+		Array.from(guildChannels.keys()).forEach((key) => {
+			const channelName = guildChannels.get(key).name;
+			const obj = {};
+			obj[key] = channelName;
+			channelNames.push(obj);
+		});
+
+		console.log(channelNames);
+
+		switch (dataRequest.method) {
+		case 'channels':
+			console.log('channels');
+			// await respondToDataRequest(dataRequest, [...await client.channels.cache]);
+			await respondToDataRequest(dataRequest, channelNames);
+			break;
+		case 'roles':
+			console.log('roles');
+			break;
+		}
+
+	});
+
+	evtSource.addEventListener('RESPONSE_CLIENT_DATA', async function(event) {
+		const dataRequest = JSON.parse(event.data);
+		console.log(dataRequest);
+	});
+
+};
+
+// FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
+const respondToDataRequest = async (dataRequest, data) => {
+	console.log(JSON.stringify(data[0]));
+	console.log(dataRequest);
+	const dataPostEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/client/discord/channels`;
+	try {
+		const dataPostEvent = await axios.post(dataPostEndpoint, {
+			uuid: dataRequest.uuid,
+			provider_id: dataRequest.provider_id,
+			method:dataRequest.method,
+			guildId: dataRequest.guildId,
+			data: data,
+		});
+
+		// console.log('dataPostEvent', dataPostEvent.data);
+
+		return dataPostEvent.data;
+
+	} catch (e) {
+		console.log('failed to post requested data', e);
+
+		return null;
+	}
 };
 
 function helpEmbed(title, polls, EmojiList, id): MessageEmbed {
