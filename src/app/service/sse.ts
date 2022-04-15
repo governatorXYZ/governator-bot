@@ -47,7 +47,9 @@ module.exports = (evtSource: NodeEventSource, client: Client) => {
 function helpEmbed(title, polls, EmojiList, id): MessageEmbed {
 	const msgEmbed = new Discord.MessageEmbed().setTitle(`GovBot\'s Poll - ${title}`);
 	polls.forEach((option: any, index: number) =>{
-		msgEmbed.addField(option, `${EmojiList[index]} : ${option}\n`);
+		msgEmbed.addField(option, `${EmojiList[index]} : ${option}\n`, true);
+		msgEmbed.addField('\u200B', '0', true);
+		msgEmbed.addField('\u200B', '\u200B', false);
 	});
 
 	msgEmbed.setFooter({
