@@ -1,14 +1,11 @@
-import Discord, { MessageButton, ButtonInteraction, MessageEmbed, MessageActionRow } from 'discord.js';
-import axios, { AxiosResponse } from 'axios';
+import { ButtonInteraction } from 'discord.js';
+import axios from 'axios';
 
 export default async (reaction: ButtonInteraction): Promise<any> => {
 
 	const poll_info = reaction.customId;
 	const poll_id = poll_info.substring(0, poll_info.indexOf(':'));
 	const poll_option = poll_info.substring(poll_info.indexOf(':') + 1);
-	// console.log('poll info ', poll_info);
-	// console.log('poll ID ', poll_id);
-	// console.log('poll option ', poll_option);
 
 	// fetch poll from db
 	const poll = await fetchPoll(poll_id);
@@ -26,6 +23,8 @@ export default async (reaction: ButtonInteraction): Promise<any> => {
 	const chosenOption = poll.poll_options.find(obj => {
 		return obj.poll_option_name === poll_option;
 	});
+
+	await reaction.reply({ content: `You clicked: ${chosenOption._id}`, ephemeral:true });
 
 	console.log('user picked option: ', chosenOption);
 

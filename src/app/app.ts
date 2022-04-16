@@ -42,13 +42,14 @@ creator.on('commandRun', (command:SlashCommand, result: Promise<any>, ctx: Comma
 	LogUtils.logCommandEnd(ctx);
 });
 
-// Register command handlers
-creator
-	.withServer(
-		new GatewayServer((handler) => client.ws.on(<WSEventType>'INTERACTION_CREATE', handler)),
-	)
-	.registerCommandsIn(path.join(__dirname, 'commands'))
-	.syncCommands();
+// FIXME find a way to get slah commands to work without interfering with other INTERACTION_CREATE events
+// // Register command handlers
+// creator
+// 	.withServer(
+// 		new GatewayServer((handler) => client.ws.on(<WSEventType>'INTERACTION_CREATE', handler)),
+// 	)
+// 	.registerCommandsIn(path.join(__dirname, 'commands'))
+// 	.syncCommands();
 
 // Log client errors
 client.on('error', Log.error);
