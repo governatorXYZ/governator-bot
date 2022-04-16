@@ -77,9 +77,9 @@ function initializeClient(): Client {
 }
 
 function initializeEvents(): void {
-	const eventFiles = fs.readdirSync(path.join(__dirname, '/events')).filter(file => file.endsWith('.js'));
+	const eventFiles = fs.readdirSync(path.join(__dirname, '/events-discord')).filter(file => file.endsWith('.js'));
 	eventFiles.forEach(file => {
-		const event = new (require(`./events/${file}`).default)();
+		const event = new (require(`./events-discord/${file}`).default)();
 		try {
 			if (event.once) {
 				client.once(event.name, (...args) => event.execute(...args, client));
