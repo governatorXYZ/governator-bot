@@ -31,6 +31,7 @@ export default class implements DiscordEvent {
 			await messageReactionAddVote(reaction, user as User).catch(e => LogUtils.logError('failed to react to poll', e));
 
 		} catch (e) {
+			// eslint-disable-next-line no-console
 			console.log('failed to process event messageReactionAdd', e);
 		}
 	}
