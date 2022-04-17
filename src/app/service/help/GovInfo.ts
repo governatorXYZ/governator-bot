@@ -3,12 +3,12 @@ import { MessageOptions } from 'slash-create';
 export default (): MessageOptions => {
 	return {
 		embeds: [{
-			title: 'Discord Bot Template',
-			description: 'This template can be used to build out new bots.',
+			title: 'Governator Command Template',
+			description: 'Template of Governator bot commands.',
 			fields: [
 				{
-					name: '-> /help me',
-					value: 'Getting more info on governator-bot!',
+					name: '-> /gov info',
+					value: 'Display ',
 					inline: false,
 				},
 				{

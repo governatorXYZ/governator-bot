@@ -1,16 +1,20 @@
-import * as Sentry from '@sentry/node';
 import { SlashCreator, GatewayServer, SlashCommand, CommandContext } from 'slash-create';
 import Discord, { Client, ClientOptions, Intents, WSEventType } from 'discord.js';
 import path from 'path';
 import fs from 'fs';
 import Log, { LogUtils } from './utils/Log';
-import apiKeys from './service/constants/apiKeys';
 import constants from './service/constants/constants';
-import { RewriteFrames } from '@sentry/integrations';
+import NodeEventSource from 'eventsource';
+const onSSEMessage = require('./service/sse');
 
-initializeSentryIO();
 const client: Client = initializeClient();
 initializeEvents();
+
+const evtSource = new NodeEventSource(
+	constants.SSE_URL,
+	// eventSourceInitDict,
+);
+onSSEMessage(evtSource, client);
 
 const creator = new SlashCreator({
 	applicationID: process.env.DISCORD_BOT_APPLICATION_ID,
@@ -48,6 +52,8 @@ creator
 
 // Log client errors
 client.on('error', Log.error);
+// reload client
+client.destroy();
 
 client.login(process.env.DISCORD_BOT_TOKEN);
 
@@ -91,21 +97,6 @@ function initializeEvents(): void {
 				},
 			});
 		}
-	});
-}
-
-function initializeSentryIO() {
-	Sentry.init({
-		dsn: `${apiKeys.sentryDSN}`,
-		tracesSampleRate: 1.0,
-		release: `${constants.APP_NAME}@${constants.APP_VERSION}`,
-		environment: `${process.env.SENTRY_ENVIRONMENT}`,
-		integrations: [
-			new RewriteFrames({
-				root: __dirname,
-			}),
-			new Sentry.Integrations.Http({ tracing: true }),
-		],
 	});
 }
 
