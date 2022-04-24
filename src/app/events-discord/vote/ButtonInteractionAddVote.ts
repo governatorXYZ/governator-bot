@@ -1,11 +1,14 @@
-import { ButtonInteraction } from 'discord.js';
-import axios from 'axios';
+import Discord, { MessageButton, ButtonInteraction, MessageEmbed, MessageActionRow } from 'discord.js';
+import axios, { AxiosResponse } from 'axios';
 
 export default async (reaction: ButtonInteraction): Promise<any> => {
 
 	const poll_info = reaction.customId;
 	const poll_id = poll_info.substring(0, poll_info.indexOf(':'));
 	const poll_option = poll_info.substring(poll_info.indexOf(':') + 1);
+	// console.log('poll info ', poll_info);
+	// console.log('poll ID ', poll_id);
+	// console.log('poll option ', poll_option);
 
 	// fetch poll from db
 	const poll = await fetchPoll(poll_id);
@@ -23,8 +26,6 @@ export default async (reaction: ButtonInteraction): Promise<any> => {
 	const chosenOption = poll.poll_options.find(obj => {
 		return obj.poll_option_name === poll_option;
 	});
-
-	// await reaction.reply({ content: `You clicked: ${chosenOption._id}`, ephemeral:true }).catch((e) => console.log(e));
 
 	console.log('user picked option: ', chosenOption);
 
@@ -105,6 +106,7 @@ const updateEmbedCountMinus1 = (embed, optionId) => {
 
 // FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
 const createVote = async (poll_option_id, user_id, poll_id) => {
+	console.log('here');
 	const voteRequestEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/vote/${poll_id}`;
 	try {
 		const vote = await axios.post(voteRequestEndpoint, {
