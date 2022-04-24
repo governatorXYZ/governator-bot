@@ -5,7 +5,7 @@ import Discord, {
 	MessageEmbed,
 	MessageActionRow,
 	MessageButton,
-	Collection, Snowflake, GuildChannel, ThreadChannel, Guild, Role
+	Collection, Snowflake, GuildChannel, ThreadChannel, Guild, Role,
 } from 'discord.js';
 import NodeEventSource from 'eventsource';
 import axios from 'axios';

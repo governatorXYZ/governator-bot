@@ -44,7 +44,7 @@
         "form-data": "^4.0.0",
         "mongodb": "^4.3.0",
         "p-queue": "^6.6.2",
-        "slash-create": "^5.0.3",
+        "slash-create": "^5.4.1",
         "uuid": "^8.3.2"
     },
     "devDependencies": {

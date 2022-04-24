@@ -24,7 +24,7 @@ export default async (reaction: ButtonInteraction): Promise<any> => {
 		return obj.poll_option_name === poll_option;
 	});
 
-	await reaction.reply({ content: `You clicked: ${chosenOption._id}`, ephemeral:true });
+	// await reaction.reply({ content: `You clicked: ${chosenOption._id}`, ephemeral:true }).catch((e) => console.log(e));
 
 	console.log('user picked option: ', chosenOption);
 
@@ -105,7 +105,6 @@ const updateEmbedCountMinus1 = (embed, optionId) => {
 
 // FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
 const createVote = async (poll_option_id, user_id, poll_id) => {
-	console.log('here');
 	const voteRequestEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/vote/${poll_id}`;
 	try {
 		const vote = await axios.post(voteRequestEndpoint, {
