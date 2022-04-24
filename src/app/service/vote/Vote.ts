@@ -1,14 +1,11 @@
-import Discord, { MessageButton, ButtonInteraction, MessageEmbed, MessageActionRow } from 'discord.js';
 import axios, { AxiosResponse } from 'axios';
+import { ComponentContext } from 'slash-create';
 
-export default async (reaction: ButtonInteraction): Promise<any> => {
+export default async (componentContext:ComponentContext): Promise<any> => {
 
-	const poll_info = reaction.customId;
+	const poll_info = componentContext.customID;
 	const poll_id = poll_info.substring(0, poll_info.indexOf(':'));
 	const poll_option = poll_info.substring(poll_info.indexOf(':') + 1);
-	// console.log('poll info ', poll_info);
-	// console.log('poll ID ', poll_id);
-	// console.log('poll option ', poll_option);
 
 	// fetch poll from db
 	const poll = await fetchPoll(poll_id);
@@ -30,20 +27,20 @@ export default async (reaction: ButtonInteraction): Promise<any> => {
 	console.log('user picked option: ', chosenOption);
 
 	// try to fetch user
-	let user = await fetchUser('discord', reaction.user.id);
+	let user = await fetchUser('discord', componentContext.user.id);
 
 	// if no user found create user
 	if (!user) {
-		user = await createUser(reaction.user.username, reaction.user.avatarURL());
+		user = await createUser(componentContext.user.username, componentContext.user.avatarURL);
 
 		// return if user could not be created
 		if (!user) return;
 
 		// link account to user
-		await linkAccount(user._id, 'discord', reaction.user.id);
+		await linkAccount(user._id, 'discord', componentContext.user.id);
 
 		// fetch again to make sure
-		user = await fetchUser('discord', reaction.user.id);
+		user = await fetchUser('discord', componentContext.user.id);
 	}
 
 	// if user not found something is wrong
@@ -58,28 +55,30 @@ export default async (reaction: ButtonInteraction): Promise<any> => {
 	let embed;
 	switch (vote.method) {
 	case 'create':
-		embed = updateEmbedCountPlus1(reaction.message.embeds[0], chosenOption._id);
+		embed = updateEmbedCountPlus1(componentContext.message.embeds[0], chosenOption._id);
 		break;
 	case 'delete':
-		embed = updateEmbedCountMinus1(reaction.message.embeds[0], chosenOption._id);
+		embed = updateEmbedCountMinus1(componentContext.message.embeds[0], chosenOption._id);
 		break;
 	case 'update':
-		embed = updateEmbedCountPlus1(reaction.message.embeds[0], chosenOption._id);
+		embed = updateEmbedCountPlus1(componentContext.message.embeds[0], chosenOption._id);
 		updateEmbedCountMinus1(embed, vote.data.oldVote.poll_option_id);
 		break;
 	}
 
-	const msgId = reaction.message.id;
+	const msg = componentContext.message;
 
-	const channel = reaction.channel;
-
-	const msg = channel.messages.cache.get(msgId);
+	console.log(JSON.stringify(msg.embeds));
 
 	await msg.edit({ embeds:[embed] });
+
+	await componentContext.send({ content: `Your vote was recorded: \n 
+		option: ${vote.method === 'update' ? vote.data.updatedVote.poll_option_id : vote.data.poll_option_id } \n
+		method: ${vote.method}`,
+	});
 };
 
 const updateEmbedCountPlus1 = (embed, optionId) => {
-	// console.log(embed);
 	embed.fields.forEach((field: any, index: number) => {
 
 		if (field.value.substring(0, field.value.indexOf(':')).replace(/\s/g, '') === optionId) {
@@ -87,12 +86,10 @@ const updateEmbedCountPlus1 = (embed, optionId) => {
 			embed.fields[index + 1].value = (parseInt(embed.fields[index + 1].value) + 1).toString();
 		}
 	});
-	// console.log(embed);
 	return embed;
 };
 
 const updateEmbedCountMinus1 = (embed, optionId) => {
-	// console.log(embed);
 	embed.fields.forEach((field: any, index: number) => {
 
 		if (field.value.substring(0, field.value.indexOf(':')).replace(/\s/g, '') === optionId) {
@@ -100,16 +97,14 @@ const updateEmbedCountMinus1 = (embed, optionId) => {
 			embed.fields[index + 1].value = (parseInt(embed.fields[index + 1].value) - 1).toString();
 		}
 	});
-	// console.log(embed);
 	return embed;
 };
 
 // FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
 const createVote = async (poll_option_id, user_id, poll_id) => {
-	console.log('here');
 	const voteRequestEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/vote/${poll_id}`;
 	try {
-		const vote = await axios.post(voteRequestEndpoint, {
+		const vote: AxiosResponse = await axios.post(voteRequestEndpoint, {
 			poll_option_id: poll_option_id,
 			user_id: user_id,
 		});
@@ -130,7 +125,7 @@ const fetchPoll = async (poll_id) => {
 	const getPollByIdEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/poll/${poll_id}`;
 
 	try {
-		const poll = await axios.get(getPollByIdEndpoint);
+		const poll: AxiosResponse = await axios.get(getPollByIdEndpoint);
 
 		console.log('Fetched Poll', poll.data);
 
@@ -148,7 +143,7 @@ const fetchUser = async (client_id, client_account_id) => {
 	const userGetEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/user/${client_id}/${client_account_id}`;
 
 	try {
-		const user = await axios.get(userGetEndpoint);
+		const user: AxiosResponse = await axios.get(userGetEndpoint);
 
 		console.log('Fetched user', user.data);
 
@@ -169,7 +164,7 @@ const createUser = async (username, pfpUrl) => {
 	const userCreateEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/user/create`;
 
 	try {
-		const user = await axios.post(userCreateEndpoint, {
+		const user: AxiosResponse = await axios.post(userCreateEndpoint, {
 			name: username,
 			image: pfpUrl,
 		});
@@ -190,7 +185,7 @@ const linkAccount = async (user_id, client_id, client_account_id) => {
 	const userAddAccountEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/user/add_provider_account`;
 
 	try {
-		const userAccount = await axios.post(userAddAccountEndpoint, {
+		const userAccount: AxiosResponse = await axios.post(userAddAccountEndpoint, {
 			user_id: user_id,
 			provider_id: client_id,
 			provider_account_id: client_account_id,
