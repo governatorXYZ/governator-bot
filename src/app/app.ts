@@ -5,6 +5,7 @@ import fs from 'fs';
 import Log, { LogUtils } from './utils/Log';
 import constants from './service/constants/constants';
 import NodeEventSource from 'eventsource';
+import axios from 'axios';
 const onSSEMessage = require('./service/sse');
 
 const client: Client = initializeClient();
@@ -12,14 +13,19 @@ initializeEvents();
 
 const evtSource = new NodeEventSource(
 	constants.SSE_URL,
-	// eventSourceInitDict,
+	{ headers: { 'X-API-KEY': process.env.GOVERNATOR_API_KEY } },
 );
 onSSEMessage(evtSource, client);
+
+axios.defaults.headers.common = {
+	'X-API-KEY': process.env.GOVERNATOR_API_KEY,
+};
 
 const creator = new SlashCreator({
 	applicationID: process.env.DISCORD_BOT_APPLICATION_ID,
 	publicKey: process.env.DISCORD_BOT_PUBLIC_KEY,
 	token: process.env.DISCORD_BOT_TOKEN,
+	disableTimeouts: true,
 });
 
 creator.on('debug', (message) => Log.debug(`debug: ${ message }`));
@@ -36,6 +42,9 @@ creator.on('commandError', (command: SlashCommand, error: Error) => Log.error(`C
 		command,
 	},
 }));
+
+// FIXME find a way to get slash commands to work without interfering with other INTERACTION_CREATE events
+// creator.on('componentInteraction', (interaction) => interaction.send({ content:'test' }));
 
 // Ran after the command has completed
 creator.on('commandRun', (command:SlashCommand, result: Promise<any>, ctx: CommandContext) => {
@@ -77,9 +86,9 @@ function initializeClient(): Client {
 }
 
 function initializeEvents(): void {
-	const eventFiles = fs.readdirSync(path.join(__dirname, '/events')).filter(file => file.endsWith('.js'));
+	const eventFiles = fs.readdirSync(path.join(__dirname, '/events-discord')).filter(file => file.endsWith('.js'));
 	eventFiles.forEach(file => {
-		const event = new (require(`./events/${file}`).default)();
+		const event = new (require(`./events-discord/${file}`).default)();
 		try {
 			if (event.once) {
 				client.once(event.name, (...args) => event.execute(...args, client));
