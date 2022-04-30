@@ -1,6 +1,6 @@
 {
-    "name": "project-name-here",
-    "version": "1.0.0",
+    "name": "governator-bot",
+    "version": "0.2.0",
     "description": "description here",
     "main": "app.js",
     "private": true,
@@ -19,9 +19,10 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/BanklessDAO/"
+        "url": "git+https://github.com/governatorXYZ/governator-bot/"
     },
     "keywords": [
+        "governator",
         "bankless",
         "discord",
         "bot",
