@@ -1,8 +1,13 @@
 # Changelog
 
+## 0.2.0
 
+1. SSE events and slash-create events initialized in similar manner as discordjs events
+2. code restructured according to new event structure
+3. component interaction handled via slash-create
+4. ephemeral confirmation message sent to user after vote
 
-## 1.0.0-PROOF-OF-CONCEPT
+## 0.1.0-PROOF-OF-CONCEPT
 
 1. bot listens to SSE & posts poll upon event
 2. bot connects to governator api via api key

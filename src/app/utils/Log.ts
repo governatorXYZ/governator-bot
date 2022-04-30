@@ -1,5 +1,5 @@
 import logdna, { Logger, LogOptions } from '@logdna/logger';
-import apiKeys from '../service/constants/apiKeys';
+import apiKeys from '../constants/apiKeys';
 import { CommandContext } from 'slash-create';
 
 let logger: Logger;
@@ -24,7 +24,7 @@ try {
 }
 
 const Log = {
-	
+
 	info(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
 		if (process.env.NODE_ENV != 'production' || !logger.info) {
 			// eslint-disable-next-line no-console
@@ -33,7 +33,7 @@ const Log = {
 			logger.info(statement, options);
 		}
 	},
-	
+
 	warn(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
 		if (process.env.NODE_ENV != 'production' || !logger.warn) {
 			// eslint-disable-next-line no-console
@@ -42,7 +42,7 @@ const Log = {
 			logger.warn(statement, options);
 		}
 	},
-	
+
 	debug(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
 		if (process.env.NODE_ENV != 'production' || !logger.debug) {
 			// eslint-disable-next-line no-console
@@ -51,7 +51,7 @@ const Log = {
 			logger.debug(statement, options);
 		}
 	},
-	
+
 	error(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
 		if (process.env.NODE_ENV != 'production' || !logger.error) {
 			// eslint-disable-next-line no-console
@@ -60,7 +60,7 @@ const Log = {
 			logger.error(statement, options);
 		}
 	},
-	
+
 	fatal(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
 		if (process.env.NODE_ENV != 'production' || !logger.fatal) {
 			// eslint-disable-next-line no-console
@@ -69,7 +69,7 @@ const Log = {
 			logger.fatal(statement, options);
 		}
 	},
-	
+
 	trace(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
 		if (process.env.NODE_ENV != 'production' || !logger.trace) {
 			// eslint-disable-next-line no-console
@@ -78,7 +78,7 @@ const Log = {
 			logger.trace(statement, options);
 		}
 	},
-	
+
 	log(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
 		if (process.env.NODE_ENV != 'production') {
 			// eslint-disable-next-line no-console
@@ -86,16 +86,16 @@ const Log = {
 		}
 		logger.log(statement, options);
 	},
-	
+
 	// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 	addMetaProperty(key: string, value: any): void {
 		logger.addMetaProperty(key, value);
 	},
-	
+
 	removeMetaProperty(key: string): void {
 		logger.removeMetaProperty(key);
 	},
-	
+
 	flush(): void {
 		logger.flush();
 	},
@@ -113,7 +113,7 @@ export const LogUtils = {
 			},
 		});
 	},
-	
+
 	logCommandEnd(ctx: CommandContext): void {
 		Log.info(`/${ctx.commandName} ended ${ctx.user.username}#${ctx.user.discriminator}`, {
 			indexMeta: true,
@@ -125,7 +125,7 @@ export const LogUtils = {
 			},
 		});
 	},
-	
+
 	logError(message: string, error: Error | any, guildId?: string): void {
 		try {
 			if (error != null && error instanceof Error) {

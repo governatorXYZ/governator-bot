@@ -1,6 +1,6 @@
 import { Client, Guild } from 'discord.js';
-import { DiscordEvent } from '../types/discord/DiscordEvent';
-import Log, { LogUtils } from '../utils/Log';
+import { DiscordEvent } from '../../types/discord/DiscordEvent';
+import Log, { LogUtils } from '../../utils/Log';
 
 export default class implements DiscordEvent {
 	name = 'ready';
