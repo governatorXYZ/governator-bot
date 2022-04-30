@@ -2,80 +2,98 @@ import logdna, { Logger, LogOptions } from '@logdna/logger';
 import apiKeys from '../constants/apiKeys';
 import { CommandContext } from 'slash-create';
 
-let logger: Logger;
+// let logger: Logger;
 
-try {
-	logger = logdna.createLogger(apiKeys.logDNAToken, {
-		app: apiKeys.logDNAAppName,
-		level: apiKeys.logDNADefault,
-	});
-	if (process.env.NODE_ENV != 'production' || !logger.info) {
-		// eslint-disable-next-line no-console
-		console.log('Logger initialized for development!');
-	} else {
-		logger.log('Logger initialized for production!');
-	}
-} catch (e) {
-	// eslint-disable-next-line no-console
-	console.log('Please setup LogDNA token.');
-	// eslint-disable-next-line no-console
-	console.log(e);
-	throw new Error();
-}
+// try {
+// 	logger = logdna.createLogger(apiKeys.logDNAToken, {
+// 		app: apiKeys.logDNAAppName,
+// 		level: apiKeys.logDNADefault,
+// 	});
+// 	if (process.env.NODE_ENV != 'production' || !logger.info) {
+// 		// eslint-disable-next-line no-console
+// 		console.log('Logger initialized for development!');
+// 	} else {
+// 		logger.log('Logger initialized for production!');
+// 	}
+// } catch (e) {
+// 	// eslint-disable-next-line no-console
+// 	console.log('Please setup LogDNA token.');
+// 	// eslint-disable-next-line no-console
+// 	console.log(e);
+// 	throw new Error();
+// }
 
 const Log = {
 
 	info(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
-		if (process.env.NODE_ENV != 'production' || !logger.info) {
+		if (process.env.NODE_ENV != 'production') {
+			// if (process.env.NODE_ENV != 'production' || !logger.info) {
 			// eslint-disable-next-line no-console
 			console.log(statement);
 		} else {
-			logger.info(statement, options);
+			// logger.info(statement, options);
+			// eslint-disable-next-line no-console
+			console.log(statement, options);
 		}
 	},
 
 	warn(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
-		if (process.env.NODE_ENV != 'production' || !logger.warn) {
+		if (process.env.NODE_ENV != 'production') {
+			// if (process.env.NODE_ENV != 'production' || !logger.warn) {
 			// eslint-disable-next-line no-console
 			console.log(statement);
 		} else {
-			logger.warn(statement, options);
+			// eslint-disable-next-line no-console
+			console.log(statement, options);
+			// logger.warn(statement, options);
 		}
 	},
 
 	debug(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
-		if (process.env.NODE_ENV != 'production' || !logger.debug) {
+		if (process.env.NODE_ENV != 'production') {
+			// if (process.env.NODE_ENV != 'production' || !logger.debug) {
 			// eslint-disable-next-line no-console
 			console.debug(statement);
 		} else {
-			logger.debug(statement, options);
+			// eslint-disable-next-line no-console
+			console.debug(statement, options);
+			// logger.debug(statement, options);
 		}
 	},
 
 	error(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
-		if (process.env.NODE_ENV != 'production' || !logger.error) {
+		if (process.env.NODE_ENV != 'production') {
+			// if (process.env.NODE_ENV != 'production' || !logger.error) {
 			// eslint-disable-next-line no-console
 			console.error(statement);
 		} else {
-			logger.error(statement, options);
+			// eslint-disable-next-line no-console
+			console.error(statement, options);
+			// logger.error(statement, options);
 		}
 	},
 
 	fatal(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
-		if (process.env.NODE_ENV != 'production' || !logger.fatal) {
+		if (process.env.NODE_ENV != 'production') {
+			// if (process.env.NODE_ENV != 'production' || !logger.fatal) {
 			// eslint-disable-next-line no-console
 			console.error(statement);
 		} else {
-			logger.fatal(statement, options);
+			// eslint-disable-next-line no-console
+			console.error(statement, options);
+			// logger.fatal(statement, options);
 		}
 	},
 
 	trace(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
-		if (process.env.NODE_ENV != 'production' || !logger.trace) {
+		if (process.env.NODE_ENV != 'production') {
+			// if (process.env.NODE_ENV != 'production' || !logger.trace) {
 			// eslint-disable-next-line no-console
 			console.log(statement);
 		} else {
-			logger.trace(statement, options);
+			// eslint-disable-next-line no-console
+			console.log(statement, options);
+			// logger.trace(statement, options);
 		}
 	},
 
@@ -84,21 +102,23 @@ const Log = {
 			// eslint-disable-next-line no-console
 			console.log(statement);
 		}
-		logger.log(statement, options);
+		// eslint-disable-next-line no-console
+		console.log(statement, options);
+		// logger.log(statement, options);
 	},
 
 	// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-	addMetaProperty(key: string, value: any): void {
-		logger.addMetaProperty(key, value);
-	},
-
-	removeMetaProperty(key: string): void {
-		logger.removeMetaProperty(key);
-	},
-
-	flush(): void {
-		logger.flush();
-	},
+	// addMetaProperty(key: string, value: any): void {
+	// 	logger.addMetaProperty(key, value);
+	// },
+	//
+	// removeMetaProperty(key: string): void {
+	// 	logger.removeMetaProperty(key);
+	// },
+	//
+	// flush(): void {
+	// 	logger.flush();
+	// },
 };
 
 export const LogUtils = {
