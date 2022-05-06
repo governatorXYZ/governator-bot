@@ -1,5 +1,4 @@
-import logdna, { Logger, LogOptions } from '@logdna/logger';
-import apiKeys from '../constants/apiKeys';
+import { LogOptions } from '@logdna/logger';
 import { CommandContext } from 'slash-create';
 
 // let logger: Logger;
