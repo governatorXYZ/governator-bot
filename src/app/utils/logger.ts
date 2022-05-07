@@ -8,6 +8,8 @@ const config = {
 winston.addColors(config.colors);
 
 const log = winston.createLogger({
+	// set log level here !
+	level: 'info',
 	levels: config.levels,
 	format: winston.format.combine(
 		winston.format.colorize({ all: true }),
@@ -25,7 +27,6 @@ const log = winston.createLogger({
 	transports: [
 		new winston.transports.Console(),
 	],
-	level: 'debug',
 });
 
 export const createLogger = function(name = 'logger') {
