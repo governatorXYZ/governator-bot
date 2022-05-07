@@ -2,7 +2,7 @@ import { SlashCreator, GatewayServer, SlashCommand, CommandContext } from 'slash
 import Discord, { Client, ClientOptions, Intents, WSEventType } from 'discord.js';
 import path from 'path';
 import fs from 'fs';
-import Log, { LogUtils } from './utils/Log';
+import { createLogger } from './utils/logger';
 import constants from './constants/constants';
 import NodeEventSource from 'eventsource';
 import axios from 'axios';
@@ -11,6 +11,14 @@ import axios from 'axios';
 axios.defaults.headers.common = {
 	'X-API-KEY': process.env.GOVERNATOR_API_KEY,
 };
+
+// initialize governator SSE
+const evtSource = new NodeEventSource(
+	constants.SSE_URL,
+	{ headers: { 'X-API-KEY': process.env.GOVERNATOR_API_KEY } },
+);
+
+initializeGovernatorEvents();
 
 // initialize discordjs client and events
 const client: Client = initializeClient();
@@ -26,14 +34,6 @@ const creator = new SlashCreator({
 });
 
 initializeSlashCreateEvents();
-
-// initialize governator SSE
-const evtSource = new NodeEventSource(
-	constants.SSE_URL,
-	{ headers: { 'X-API-KEY': process.env.GOVERNATOR_API_KEY } },
-);
-
-initializeGovernatorEvents();
 
 // Register command handlers
 creator
@@ -69,8 +69,10 @@ function initializeClient(): Client {
 }
 
 function initializeDiscordJsEvents(): void {
+	// get new winston child logger
+	const logger = createLogger('app:discordjs-events');
 	// Log client errors
-	client.on('error', Log.error);
+	client.on('error', (statement: string | any) => { logger.error(statement); });
 
 	const eventFiles = fs.readdirSync(path.join(__dirname, '/events/events-discordjs')).filter(file => file.endsWith('.js'));
 	eventFiles.forEach(file => {
@@ -81,8 +83,9 @@ function initializeDiscordJsEvents(): void {
 			} else {
 				client.on(event.name, (...args) => event.execute(...args, client));
 			}
+			logger.debug(`Registered event ${event.name}`);
 		} catch (e) {
-			Log.error('Event failed to process', {
+			logger.error('Event failed to process', {
 				indexMeta: true,
 				meta: {
 					name: e.name,
@@ -96,12 +99,14 @@ function initializeDiscordJsEvents(): void {
 }
 
 function initializeSlashCreateEvents(): void {
-	creator.on('debug', (message) => Log.debug(`debug: ${ message }`));
-	creator.on('warn', (message) => Log.warn(`warn: ${ message }`));
-	creator.on('error', (error: Error) => Log.error(`error: ${ error }`));
-	creator.on('synced', () => Log.debug('Commands synced!'));
-	creator.on('commandRegister', (command: SlashCommand) => Log.debug(`Registered command ${command.commandName}`));
-	creator.on('commandError', (command: SlashCommand, error: Error) => Log.error(`Command ${command.commandName}:`, {
+	// get new winston child logger
+	const logger = createLogger('app:slash-create-events');
+	creator.on('debug', (message) => logger.debug(message));
+	creator.on('warn', (message) => logger.warn(message));
+	creator.on('error', (error: Error) => logger.error(error));
+	creator.on('synced', () => logger.info('Commands synced!'));
+	// creator.on('commandRegister', (command: SlashCommand) => logger.info(`Registered command ${command.commandName}`));
+	creator.on('commandError', (command: SlashCommand, error: Error) => logger.error(`Command ${command.commandName}:`, {
 		indexMeta: true,
 		meta: {
 			name: error.name,
@@ -112,7 +117,15 @@ function initializeSlashCreateEvents(): void {
 	}));
 	// Ran after the command has completed
 	creator.on('commandRun', (command:SlashCommand, result: Promise<any>, ctx: CommandContext) => {
-		LogUtils.logCommandEnd(ctx);
+		logger.debug(`${ctx.user.username}#${ctx.user.discriminator} ran /${ctx.commandName}`, {
+			indexMeta: true,
+			meta: {
+				guildId: ctx.guildID,
+				userTag: `${ctx.user.username}#${ctx.user.discriminator}`,
+				userId: ctx.user.id,
+				params: ctx.options,
+			},
+		});
 	});
 
 	const eventFiles = fs.readdirSync(path.join(__dirname, '/events/events-slash-create')).filter(file => file.endsWith('.js'));
@@ -124,8 +137,9 @@ function initializeSlashCreateEvents(): void {
 			} else {
 				creator.on(event.name, (...args) => event.execute(...args, client));
 			}
+			logger.debug(`Registered event ${event.name}`);
 		} catch (e) {
-			Log.error('Slash-create event failed to process', {
+			logger.error('Slash-create event failed to process', {
 				indexMeta: true,
 				meta: {
 					name: e.name,
@@ -139,10 +153,12 @@ function initializeSlashCreateEvents(): void {
 }
 
 function initializeGovernatorEvents(): void {
+	const logger = createLogger('app:governator-events');
+
 	evtSource.onerror = function(err) {
 		if (err) {
 			if (err.status === 401 || err.status === 403) {
-				Log.error('not authorized');
+				logger.error('not authorized');
 			}
 		}
 	};
@@ -151,9 +167,10 @@ function initializeGovernatorEvents(): void {
 		const event = new (require(`./events/events-governator/${file}`).default)();
 		try {
 			evtSource.addEventListener(event.name, async (...args) => event.execute(...args, client));
+			logger.debug(`Registered event ${event.name}`);
 		} catch (e) {
 			console.log(e);
-			Log.error('Governator event failed to process', {
+			logger.error('event failed to process', {
 				indexMeta: true,
 				meta: {
 					name: e.name,
@@ -165,6 +182,5 @@ function initializeGovernatorEvents(): void {
 		}
 	});
 }
-
 
 export default client;

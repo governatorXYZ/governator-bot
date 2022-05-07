@@ -7,7 +7,6 @@ import {
 import HelpMe from '../../service/help/HelpMe';
 import ExampleButton from '../../service/help/ExampleButton';
 import ExampleEmoji from '../../service/help/ExampleEmoji';
-import { LogUtils } from '../../utils/Log';
 import ValidationError from '../../errors/ValidationError'
 
 export default class Help extends SlashCommand {
@@ -46,12 +45,11 @@ export default class Help extends SlashCommand {
 			defaultPermission: true,
 		});
 	}
-	
+
 	async run(ctx: CommandContext): Promise<any> {
-		LogUtils.logCommandStart(ctx);
 		if (ctx.user.bot) return;
 		const subCommand: string = ctx.subcommands[0];
-		
+
 		let messageOptions: MessageOptions;
 		let command: Promise<any>;
 		switch (subCommand) {
@@ -60,7 +58,6 @@ export default class Help extends SlashCommand {
 			case 'example1':
 				messageOptions = ExampleButton();
 				return ctx.send(messageOptions);
-				break;
 			case 'example2':
 				command = ExampleEmoji(ctx);
 				break;
