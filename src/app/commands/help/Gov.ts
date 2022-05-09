@@ -5,7 +5,6 @@ import {
 	SlashCreator,
 } from 'slash-create';
 import GovInfo from '../../service/help/GovInfo';
-import { LogUtils } from '../../utils/Log';
 
 export default class Help extends SlashCommand {
 	constructor(creator: SlashCreator) {
@@ -28,7 +27,6 @@ export default class Help extends SlashCommand {
 	}
 
 	async run(ctx: CommandContext): Promise<any> {
-		LogUtils.logCommandStart(ctx);
 		if (ctx.user.bot) return;
 
 		let messageOptions: MessageOptions;

@@ -1,5 +1,8 @@
 import axios, { AxiosResponse } from 'axios';
 import { ComponentContext } from 'slash-create';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('Vote');
 
 export default async (componentContext:ComponentContext): Promise<any> => {
 
@@ -24,7 +27,7 @@ export default async (componentContext:ComponentContext): Promise<any> => {
 		return obj.poll_option_name === poll_option;
 	});
 
-	console.log('user picked option: ', chosenOption);
+	logger.data('user picked option: ', chosenOption);
 
 	// try to fetch user
 	let user = await fetchUser('discord', componentContext.user.id);
@@ -68,7 +71,8 @@ export default async (componentContext:ComponentContext): Promise<any> => {
 
 	const msg = componentContext.message;
 
-	console.log(JSON.stringify(msg.embeds));
+	logger.info('Updated embed');
+	logger.data('Updated embed', msg.embeds);
 
 	await msg.edit({ embeds:[embed] });
 
@@ -76,6 +80,8 @@ export default async (componentContext:ComponentContext): Promise<any> => {
 		option: ${vote.method === 'update' ? vote.data.updatedVote.poll_option_id : vote.data.poll_option_id } \n
 		method: ${vote.method}`,
 	});
+
+	logger.info('Vote recorded successfully');
 };
 
 const updateEmbedCountPlus1 = (embed, optionId) => {
@@ -109,12 +115,13 @@ const createVote = async (poll_option_id, user_id, poll_id) => {
 			user_id: user_id,
 		});
 
-		console.log('Your Vote', vote.data);
+		logger.info('Vote request posted');
+		logger.data('Vote request:', vote.data);
 
 		return vote.data;
 
 	} catch (e) {
-		console.log('vote request failed', e);
+		logger.error('vote request failed', e);
 
 		return null;
 	}
@@ -127,12 +134,13 @@ const fetchPoll = async (poll_id) => {
 	try {
 		const poll: AxiosResponse = await axios.get(getPollByIdEndpoint);
 
-		console.log('Fetched Poll', poll.data);
+		logger.info('Fetched poll');
+		logger.data('Fetched poll', poll.data);
 
 		return poll.data;
 
 	}	catch(e) {
-		console.log('failed to fetch poll', e);
+		logger.error('Failed to fetch poll', e);
 
 		return null;
 	}
@@ -145,18 +153,16 @@ const fetchUser = async (client_id, client_account_id) => {
 	try {
 		const user: AxiosResponse = await axios.get(userGetEndpoint);
 
-		console.log('Fetched user', user.data);
+		logger.info('Fetched user');
+		logger.data('Fetched user', user.data);
 
 		return user.data;
 
 	} catch (e) {
-		console.log('Failed to fetch user', e);
+		logger.error('Failed to fetch user', e);
 
 		return null;
 	}
-	// console.log('user fetch failed', e);
-	// console.log(e.request.res.statusMessage);
-	// console.log(e.request.res.statusMessage === 'Not Found');
 };
 
 // FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
@@ -169,12 +175,13 @@ const createUser = async (username, pfpUrl) => {
 			image: pfpUrl,
 		});
 
-		console.log('Created user', user.data);
+		logger.info('Created user');
+		logger.data('Created user', user.data);
 
 		return user.data;
 
 	}	catch(e) {
-		console.log('failed to create user', e);
+		logger.error('failed to create user', e);
 
 		return null;
 	}
@@ -191,65 +198,14 @@ const linkAccount = async (user_id, client_id, client_account_id) => {
 			provider_account_id: client_account_id,
 		});
 
-		console.log(`Account linked to user ${user_id}`, userAccount.data);
+		logger.info('Account linked');
+		logger.data(`Account linked to user ${user_id}`, userAccount.data);
 
 		return userAccount.data;
 
 	}	catch(e) {
-		console.log(`failed to link account to user ${user_id}`, e);
+		logger.error(`failed to link account to user ${user_id}`, e);
 
 		return null;
 	}
 };
-
-
-// TODO get reply to work
-// const emojiInfo = {};
-// function helpEmbed(poll): MessageEmbed {
-// 	const polls = [];
-// 	const EmojiList = [];
-// 	poll.data.poll_options.forEach((option) => {
-// 		EmojiList.push(option.poll_option_emoji);
-// 	});
-// 	poll.data.poll_options.forEach((option: any, index: number) =>{
-// 		emojiInfo[EmojiList[index]] = { option: EmojiList[index], votes: 0 };
-// 		polls.push(option.poll_option_name);
-// 	});
-// 	const msgEmbed = new Discord.MessageEmbed().setTitle(`GovBot\'s Poll - ${poll.data.title}`);
-// 	polls.forEach((option: any, index: number) =>{
-// 		msgEmbed.addField(option, `${EmojiList[index]} : ${option}\n`);
-// 	});
-//
-// 	msgEmbed.setFooter({
-// 		text: poll.data._id,
-// 	});
-//
-// 	return msgEmbed;
-// }
-
-
-// if (!vote) return;
-
-// try {
-// await message.reactions.resolve(reaction.customId).users.remove(user.id);
-// await reaction.reply({ content: `You voted for ${poll_option}`, ephemeral: true });
-
-// const msgEmbed = helpEmbed(poll);
-// const row = new MessageActionRow();
-// poll.poll_options.forEach((option: any, index: number) =>{
-// 	row.addComponents(
-// 		new MessageButton()
-// 			.setCustomId(`${poll_id}:${option}`)
-// 			.setLabel(`${poll.data.poll_options.poll_option_emoji[index]}`)
-// 			.setStyle('PRIMARY'),
-// 	);
-// });
-// msgEmbed.addField('Voted', `You voted for ${poll_option}`);
-// await reaction.update({ content: `You voted for ${poll_option}`, components: [row] });
-
-// await reaction.followUp({ content: `You voted for ${poll_option}`, ephemeral: true, embeds: [msgEmbed], components: [row] });
-// await reaction.update({ content: `You voted for ${poll_option}`, components: [row] });
-
-// } catch (e) {
-// 	console.log ('vote follow up failed', e);
-// }
