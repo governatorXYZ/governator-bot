@@ -36,9 +36,14 @@ export default async (event, client): Promise<void> => {
 
 	const row = new MessageActionRow();
 
-	const dest = await client.channels.fetch(poll.channel_id) as TextChannel;
+	const dest = await client.channels.fetch(poll.channel_id).catch((e) => {
+		logger.error(e);
+		return null;
+	}) as TextChannel;
 
-	const msgEmbed = helpEmbed(poll.title, polls, EmojiList, poll._id);
+	if (!dest) return;
+
+	const msgEmbed = pollEmbed(poll, polls, EmojiList, poll._id);
 
 	polls.forEach((option: any, index: number) => {
 		row.addComponents(
@@ -51,11 +56,24 @@ export default async (event, client): Promise<void> => {
 
 	logger.data('msgEmbed', msgEmbed);
 
-	await dest.send({ embeds: [ msgEmbed ], components: [row] });
+	const pollMessage = await dest.send({ embeds: [ msgEmbed ], components: [row] }).catch((e) => {
+		logger.error(e);
+		return null;
+	});
+
+	if (!pollMessage) return;
+
+	logger.info('Poll posted successfully');
 };
 
-function helpEmbed(title, polls, EmojiList, id): MessageEmbed {
-	const msgEmbed = new Discord.MessageEmbed().setTitle(`Governator Poll - ${title}`);
+function pollEmbed(poll, polls, EmojiList, id): MessageEmbed {
+
+	// TODO: add author to the embed (required endpoint to look up client ID based on goverator user ID from poll)
+	const msgEmbed = new Discord.MessageEmbed().setTitle(`Governator Poll - ${poll.title}`)
+		.setDescription(poll.description)
+		.setFooter({
+			text: id,
+		});
 
 	polls.forEach((option: any, index: number) =>{
 		msgEmbed.addField(option, `${EmojiList[index]} : ${option}\n`, true);
@@ -65,9 +83,6 @@ function helpEmbed(title, polls, EmojiList, id): MessageEmbed {
 		msgEmbed.addField('\u200B', '\u200B', false);
 	});
 
-	msgEmbed.setFooter({
-		text: id,
-	});
-
 	return msgEmbed;
+
 }
