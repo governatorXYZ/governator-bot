@@ -9,7 +9,7 @@ winston.addColors(config.colors);
 
 const log = winston.createLogger({
 	// set log level here !
-	level: 'info',
+	level: process.env.LOG_LEVEL ? process.env.LOG_LEVEL : 'info',
 	levels: config.levels,
 	format: winston.format.combine(
 		winston.format.colorize({ all: true }),

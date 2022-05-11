@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { ComponentContext } from 'slash-create';
 import { createLogger } from '../../utils/logger';
+import client from '../../app';
 
 const logger = createLogger('Vote');
 
@@ -14,6 +15,13 @@ export default async (componentContext:ComponentContext): Promise<any> => {
 	const poll = await fetchPoll(poll_id);
 
 	if (!poll) return;
+
+	if (poll.role_restrictions.length > 0) {
+		if (await roleRestricted(componentContext, poll.role_restrictions)) {
+			await componentContext.send({ content: 'You do not have the required role to vote on this poll' });
+			return;
+		}
+	}
 
 	// create list of poll options
 	const PollOptionList = [];
@@ -82,6 +90,30 @@ export default async (componentContext:ComponentContext): Promise<any> => {
 	});
 
 	logger.info('Vote recorded successfully');
+};
+
+const roleRestricted = async (componentContext, roleRestrictions) => {
+
+	logger.info('Role restrictions apply, checking if user has required role');
+
+	await client.guilds.fetch().catch((e) => {
+		logger.error(e);
+	});
+
+	const guild = client.guilds.cache.get(componentContext.guildID);
+
+	await guild.members.fetch().catch((e) => {
+		logger.error(e);
+	});
+	const guildMember = guild.members.cache.get(componentContext.user.id);
+
+	const restricted = guildMember.roles.cache.every((value, key) => {
+		return !roleRestrictions.includes(key);
+	});
+
+	logger.info(`User allowed to vote: ${!restricted}`);
+
+	return restricted;
 };
 
 const updateEmbedCountPlus1 = (embed, optionId) => {
