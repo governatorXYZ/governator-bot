@@ -8,7 +8,10 @@ import apiKeys from './service/constants/apiKeys';
 import constants from './service/constants/constants';
 import { RewriteFrames } from '@sentry/integrations';
 
-initializeSentryIO();
+const isProduction = process.env.NODE_ENV === 'production';
+if (isProduction) {
+	initializeSentryIO();
+}
 const client: Client = initializeClient();
 initializeEvents();
 
