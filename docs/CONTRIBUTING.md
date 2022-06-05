@@ -12,7 +12,7 @@ To get setup, please follow these guidelines:
 4. On the left, select "Bot" and create a bot user
 5. Switch on "Presence Intent" and "Server Members Intent"
 6. Save your changes
-7. On the left, select "OAuth2"
+7. On the left, select "OAuth2" and navigate to "URL Generator"
 8. Under "Scopes", select "bot"
 9. Permissions. Enable only these permissions:
 
@@ -22,7 +22,7 @@ To get setup, please follow these guidelines:
 -   Ban Members
 -   Manage Emojis & Stickers
 -   Manage Webhooks
--   View Channels
+-   Read Messages/View Channels
 -   All of the permissions under "Text Permissions"
 -   No permissions under "Voice Permissions"
 
