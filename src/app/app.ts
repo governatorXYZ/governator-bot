@@ -159,9 +159,12 @@ function initializeGovernatorEvents(): void {
 		if (err) {
 			if (err.status === 401 || err.status === 403) {
 				logger.error('not authorized');
+			} else {
+				logger.error(err);
 			}
 		}
 	};
+
 	const eventFiles = fs.readdirSync(path.join(__dirname, '/events/events-governator')).filter(file => file.endsWith('.js'));
 	eventFiles.forEach(file => {
 		const event = new (require(`./events/events-governator/${file}`).default)();
@@ -169,7 +172,7 @@ function initializeGovernatorEvents(): void {
 			evtSource.addEventListener(event.name, async (...args) => event.execute(...args, client));
 			logger.debug(`Registered event ${event.name}`);
 		} catch (e) {
-			console.log(e);
+			logger.error(e);
 			logger.error('event failed to process', {
 				indexMeta: true,
 				meta: {
