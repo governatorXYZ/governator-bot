@@ -80,7 +80,7 @@ function pollEmbed(poll, poll_options, EmojiList, id): MessageEmbed {
 		});
 
 	poll_options.forEach((option: any, index: number) =>{
-		msgEmbed.addField(option.poll_option_name, `${EmojiList[index]} : ${option.poll_option_name}\n`, true);
+		msgEmbed.addField(option.poll_option_name, `${EmojiList[index]}\n`, true);
 
 		msgEmbed.addField('\u200B', '0', true);
 

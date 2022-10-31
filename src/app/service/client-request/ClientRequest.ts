@@ -1,4 +1,4 @@
-import {Collection, Guild, GuildChannel, Role, Snowflake, TextChannel, ThreadChannel} from 'discord.js';
+import { Collection, Guild, GuildChannel, Role, Snowflake, TextChannel, ThreadChannel } from 'discord.js';
 import axios from 'axios';
 import { createLogger } from '../../utils/logger';
 
