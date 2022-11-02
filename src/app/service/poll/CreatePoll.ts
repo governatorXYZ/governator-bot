@@ -1,5 +1,6 @@
 import Discord, { MessageActionRow, MessageButton, MessageEmbed, TextChannel } from 'discord.js';
 import { createLogger } from '../../utils/logger';
+import axios, {AxiosResponse} from "axios";
 
 const logger = createLogger('CreatePoll');
 
@@ -67,8 +68,38 @@ export default async (event, client): Promise<void> => {
 
 	if (!pollMessage) return;
 
+	await updatePoll(poll, pollMessage.id);
+
 	logger.info('Poll posted successfully');
 };
+
+const updatePoll = async (poll, messageId) => {
+	const pollPatchEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/poll/update/${poll._id}`;
+
+	poll.client_config.forEach((conf) => {
+		if (conf.provider_id === 'discord') {
+			conf['message_id'] = messageId;
+		}
+	});
+
+	logger.debug('update poll: ');
+	logger.data(poll.client_config);
+
+	try {
+		const newPoll: AxiosResponse = await axios.patch(pollPatchEndpoint, { client_config: poll.client_config });
+
+		logger.info('Poll patch posted');
+		logger.data('Poll patch:', newPoll.data);
+
+		return newPoll.data;
+
+	} catch (e) {
+		logger.error('poll patch failed', e);
+
+		return null;
+	}
+};
+
 
 function pollEmbed(poll, poll_options, EmojiList, id): MessageEmbed {
 

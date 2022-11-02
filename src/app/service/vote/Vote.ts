@@ -372,7 +372,7 @@ const fetchStrategy = async (strategyId) => {
 };
 
 // FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
-const fetchPoll = async (poll_id) => {
+export const fetchPoll = async (poll_id) => {
 	const getPollByIdEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/poll/${poll_id}`;
 
 	try {
@@ -445,6 +445,25 @@ const createAccount = async (id, username) => {
 
 	}	catch(e) {
 		logger.error('failed to create account', e);
+
+		return null;
+	}
+};
+
+// FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
+export const fetchResultSum = async (pollId) => {
+	const resultsSumGetEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/vote/results/sum/${pollId}`;
+
+	try {
+		const results: AxiosResponse = await axios.get(resultsSumGetEndpoint);
+
+		logger.info('Fetched results');
+		logger.data(results.data);
+
+		return results.data;
+
+	} catch (e) {
+		logger.error('Failed to fetch results', e);
 
 		return null;
 	}
