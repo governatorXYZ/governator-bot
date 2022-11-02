@@ -37,6 +37,8 @@
     "dependencies": {
         "@logdna/logger": "^2.6.0",
         "@types/node": "^16.7.1",
+        "ascii-art": "^2.8.5",
+        "ascii-art-font": "^1.0.2",
         "dayjs": "^1.10.7",
         "dd-trace": "^1.5.1",
         "discord.js": "^13.6.0",

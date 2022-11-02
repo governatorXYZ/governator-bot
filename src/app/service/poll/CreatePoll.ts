@@ -1,6 +1,8 @@
 import Discord, { MessageActionRow, MessageButton, MessageEmbed, TextChannel } from 'discord.js';
 import { createLogger } from '../../utils/logger';
-import axios, {AxiosResponse} from "axios";
+import axios, { AxiosResponse } from 'axios';
+import { createAscii } from '../vote/Vote';
+import { cache } from '../../app';
 
 const logger = createLogger('CreatePoll');
 
@@ -48,7 +50,7 @@ export default async (event, client): Promise<void> => {
 
 	if (!dest) return;
 
-	const msgEmbed = pollEmbed(poll, poll_options, EmojiList, poll._id);
+	const msgEmbed = await pollEmbed(poll, poll_options, EmojiList, poll._id);
 
 	polls.forEach((option: any, index: number) => {
 		row.addComponents(
@@ -101,7 +103,7 @@ const updatePoll = async (poll, messageId) => {
 };
 
 
-function pollEmbed(poll, poll_options, EmojiList, id): MessageEmbed {
+async function pollEmbed(poll, poll_options, EmojiList, id): Promise<MessageEmbed> {
 
 	// TODO: add author to the embed (required endpoint to look up client ID based on goverator user ID from poll)
 	const msgEmbed = new Discord.MessageEmbed().setTitle(`Governator Poll - ${poll.title}`)
@@ -113,10 +115,18 @@ function pollEmbed(poll, poll_options, EmojiList, id): MessageEmbed {
 	poll_options.forEach((option: any, index: number) =>{
 		msgEmbed.addField(option.poll_option_name, `${EmojiList[index]}\n`, true);
 
-		msgEmbed.addField('\u200B', '0', true);
+		msgEmbed.addField('\u200B', '\u200B', true);
 
 		msgEmbed.addField('\u200B', '\u200B', false);
 	});
+
+	const ascii = await createAscii(0);
+
+	const ascii2 = ascii.replace(/.$/, '0');
+
+	msgEmbed.addField('```' + ascii2 + '```', '\u200B', false);
+
+	cache.set(id, 0);
 
 	return msgEmbed;
 

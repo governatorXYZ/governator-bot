@@ -12,7 +12,7 @@ export default async (event, client): Promise<void> => {
 
 	const poll = await fetchPoll(pollId);
 
-	const config = poll.client_config.find((conf) => conf.provider_id === 'discord')
+	const config = poll.client_config.find((conf) => conf.provider_id === 'discord');
 
 	if (!config.message_id) {
 		logger.error(`no message ID specified for poll ID ${pollId}`);
@@ -58,7 +58,7 @@ export default async (event, client): Promise<void> => {
 				logger.debug('Updated value');
 				logger.data(result.percent);
 
-				pollMessage.embeds[0].fields[index + 1].value = `${result.percent} %`;
+				pollMessage.embeds[0].fields[index].value = `${field.value}:${result.percent} %`;
 			}
 		});
 	});

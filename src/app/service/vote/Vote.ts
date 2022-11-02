@@ -2,7 +2,9 @@ import axios, { AxiosResponse } from 'axios';
 import { ComponentContext } from 'slash-create';
 import { createLogger } from '../../utils/logger';
 import client from '../../app';
-import { ethers } from 'ethers';
+// import { ethers } from 'ethers';
+import Font from 'ascii-art-font';
+import { cache } from '../../app';
 
 const logger = createLogger('Vote');
 
@@ -77,7 +79,7 @@ const discordVote = async (componentContext, chosenOption, poll) => {
 
 	if (!vote) return;
 
-	await updateEmbedCount(poll, vote, componentContext, chosenOption, voteParams);
+	await updateEmbedCount(poll, vote, componentContext, chosenOption);
 
 	await componentContext.send({ content: `Your vote was recorded: \n 
 		option: ${vote.method === 'update' ? vote.data.updatedVote.poll_option_id : vote.data.poll_option_id } \n
@@ -146,7 +148,7 @@ const tokenVote = async (componentContext, poll, chosenOption) => {
 
 				if (!vote) return;
 
-				await updateEmbedCount(poll, vote, componentContext, chosenOption, voteParams);
+				await updateEmbedCount(poll, vote, componentContext, chosenOption);
 
 				strategyResults.push({ address: addr, strategy: conf.strategy_id, VotingPower: power, option: chosenOption.poll_option_name, method: vote.method });
 
@@ -186,38 +188,19 @@ const roleRestricted = async (componentContext, roleRestrictions) => {
 	return restricted;
 };
 
-const updateEmbedCount = async (poll, vote, componentContext, chosenOption, voteParams) => {
+const updateEmbedCount = async (poll, vote, componentContext, chosenOption) => {
 	logger.debug('Chosen Option: ', chosenOption);
 
-	let power;
-	if (poll.token_strategies && (poll.token_strategies.length > 0)) {
-		power = Math.round(Number(ethers.utils.formatEther(ethers.BigNumber.from(voteParams.vote_power))));
-	} else {
-		power = Number(voteParams.vote_power);
-	}
-
-	// update the poll embed
 	let embed;
-	let oldVotePollOption;
 	switch (vote.method) {
 	case 'create':
-		embed = updateEmbedCountAdd(componentContext.message.embeds[0], chosenOption.poll_option_emoji, power);
+		embed = await updateEmbedCountAdd(componentContext.message.embeds[0]);
 		break;
 	case 'delete':
-		embed = updateEmbedCountSubtract(componentContext.message.embeds[0], chosenOption.poll_option_emoji, power);
+		embed = await updateEmbedCountSubtract(componentContext.message.embeds[0]);
 		break;
 	case 'update':
-		embed = updateEmbedCountAdd(componentContext.message.embeds[0], chosenOption.poll_option_emoji, power);
-		logger.debug('old vote: ');
-		logger.data(vote.data.oldVote.poll_option_id);
-		oldVotePollOption = poll.poll_options.filter((poll_option) => {
-			logger.debug(poll_option);
-			logger.debug(poll_option['poll_option_id'] === vote.data.oldVote.poll_option_id);
-			return poll_option['poll_option_id'] === vote.data.oldVote.poll_option_id;
-		});
-		logger.data(oldVotePollOption);
-		updateEmbedCountSubtract(embed, oldVotePollOption[0].poll_option_emoji, power);
-		break;
+		return;
 	}
 
 	const msg = componentContext.message;
@@ -228,59 +211,121 @@ const updateEmbedCount = async (poll, vote, componentContext, chosenOption, vote
 	await msg.edit({ embeds:[embed] });
 };
 
-const updateEmbedCountAdd = (embed, optionEmoji, summand) => {
+export const createAscii = async (count: number) => {
+
+	const pad = (num: number, size: number): string => {
+		const s = '0000000' + num;
+		return s.slice(s.length - size);
+	};
+
+	let rendered = null;
+
+	try {
+		rendered = await Font.create(pad(count, 4), 'Doom');
+
+		logger.info(rendered);
+
+	} catch(err) {
+		logger.error('failed to create ascii art');
+	}
+
+	return rendered;
+};
+
+const updateEmbedCountAdd = async (embed) => {
 
 	logger.info('Updating embed count (add)');
 	logger.data(embed);
-	logger.debug('selected option emoji: ');
-	logger.data(optionEmoji);
-	logger.debug('summand: ');
-	logger.data(summand);
 
-	embed.fields.forEach((field: any, index: number) => {
+	const pollId = embed.footer.text;
 
-		logger.debug('field value: ');
-		logger.data(field.value);
+	const currentCount = cache.get(pollId);
 
-		if (field.value === optionEmoji) {
+	logger.info(`current count is ${currentCount}`);
+	logger.info(currentCount + 1);
 
-			logger.debug('Current value');
-			logger.data(parseInt(embed.fields[index + 1].value));
-			logger.debug('Updated value');
-			logger.data((parseInt(embed.fields[index + 1].value) + summand).toString());
+	const ascii = await createAscii(currentCount + 1);
 
-			embed.fields[index + 1].value = (parseInt(embed.fields[index + 1].value) + summand).toString();
-		}
-	});
+	logger.info(ascii);
+
+	embed.fields[embed.fields.length - 1].name = '```' + ascii + '```';
+
+	cache.set(pollId, currentCount + 1);
+
 	return embed;
 };
 
-const updateEmbedCountSubtract = (embed, optionEmoji, subtrahend) => {
+const updateEmbedCountSubtract = async (embed) => {
 
-	logger.info('Updating embed count (substract)');
+	logger.info('Updating embed count (subtract)');
 	logger.data(embed);
-	logger.debug('selected option emoji: ');
-	logger.data(optionEmoji);
-	logger.debug('subtrahend: ');
-	logger.data(subtrahend);
 
-	embed.fields.forEach((field: any, index: number) => {
+	const pollId = embed.footer.text;
 
-		logger.debug('field value: ');
-		logger.data(field.value);
+	const currentCount = cache.get(pollId);
 
-		if (field.value === optionEmoji) {
+	const ascii = await createAscii(currentCount - 1);
 
-			logger.debug('Current value');
-			logger.data(parseInt(embed.fields[index + 1].value));
-			logger.debug('Updated value');
-			logger.data((parseInt(embed.fields[index + 1].value) - subtrahend).toString());
+	embed.fields[embed.fields.length - 1].name = '```' + ascii + '```';
 
-			embed.fields[index + 1].value = (parseInt(embed.fields[index + 1].value) - subtrahend).toString();
-		}
-	});
+	cache.set(pollId, currentCount - 1);
+
 	return embed;
 };
+
+// const updateEmbedCountAdd = (embed, optionEmoji, summand) => {
+//
+// 	logger.info('Updating embed count (add)');
+// 	logger.data(embed);
+// 	logger.debug('selected option emoji: ');
+// 	logger.data(optionEmoji);
+// 	logger.debug('summand: ');
+// 	logger.data(summand);
+//
+// 	embed.fields.forEach((field: any, index: number) => {
+//
+// 		logger.debug('field value: ');
+// 		logger.data(field.value);
+//
+// 		if (field.value === optionEmoji) {
+//
+// 			logger.debug('Current value');
+// 			logger.data(parseInt(embed.fields[index + 1].value));
+// 			logger.debug('Updated value');
+// 			logger.data((parseInt(embed.fields[index + 1].value) + summand).toString());
+//
+// 			embed.fields[index + 1].value = (parseInt(embed.fields[index + 1].value) + summand).toString();
+// 		}
+// 	});
+// 	return embed;
+// };
+//
+// const updateEmbedCountSubtract = (embed, optionEmoji, subtrahend) => {
+//
+// 	logger.info('Updating embed count (substract)');
+// 	logger.data(embed);
+// 	logger.debug('selected option emoji: ');
+// 	logger.data(optionEmoji);
+// 	logger.debug('subtrahend: ');
+// 	logger.data(subtrahend);
+//
+// 	embed.fields.forEach((field: any, index: number) => {
+//
+// 		logger.debug('field value: ');
+// 		logger.data(field.value);
+//
+// 		if (field.value === optionEmoji) {
+//
+// 			logger.debug('Current value');
+// 			logger.data(parseInt(embed.fields[index + 1].value));
+// 			logger.debug('Updated value');
+// 			logger.data((parseInt(embed.fields[index + 1].value) - subtrahend).toString());
+//
+// 			embed.fields[index + 1].value = (parseInt(embed.fields[index + 1].value) - subtrahend).toString();
+// 		}
+// 	});
+// 	return embed;
+// };
 
 // const updateEmbedCountPlus1 = (embed, optionEmoji) => {
 // 	embed.fields.forEach((field: any, index: number) => {
