@@ -3,6 +3,7 @@ import { createLogger } from '../../utils/logger';
 import axios, { AxiosResponse } from 'axios';
 import { createAscii } from '../vote/Vote';
 import { cache } from '../../app';
+import moment from 'moment';
 
 const logger = createLogger('CreatePoll');
 
@@ -111,6 +112,12 @@ async function pollEmbed(poll, poll_options, EmojiList, id): Promise<MessageEmbe
 		.setFooter({
 			text: id,
 		});
+
+	const ts = moment(poll.end_time).utc().format('X');
+
+	logger.info(`poll end time: ${poll.end_time}, timestamp: ${ts}`);
+
+	msgEmbed.addField(`Poll ends <t:${ts}:R>`, '\u200B', false);
 
 	poll_options.forEach((option: any, index: number) =>{
 		msgEmbed.addField(option.poll_option_name, `${EmojiList[index]}\n`, true);
