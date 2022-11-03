@@ -1,6 +1,7 @@
 import { TextChannel } from 'discord.js';
 import { createLogger } from '../../utils/logger';
 import { fetchPoll, fetchResultSum } from '../vote/Vote';
+import { cache } from '../../app';
 
 const logger = createLogger('CreatePoll');
 
@@ -63,5 +64,8 @@ export default async (event, client): Promise<void> => {
 		});
 	});
 
+	// TODO think about race condition
 	await pollMessage.edit({ embeds: pollMessage.embeds, components: [] });
+
+	cache.clear(pollId);
 };
