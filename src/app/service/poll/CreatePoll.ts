@@ -122,9 +122,7 @@ async function pollEmbed(poll, poll_options, EmojiList, id): Promise<MessageEmbe
 
 	const ascii = await createAscii(0);
 
-	const ascii2 = ascii.replace(/.$/, '0');
-
-	msgEmbed.addField('```' + ascii2 + '```', '\u200B', false);
+	msgEmbed.addField('```' + ascii + '```', '\u200B', false);
 
 	cache.set(id, 0);
 

@@ -213,23 +213,24 @@ const updateEmbedCount = async (poll, vote, componentContext, chosenOption) => {
 
 export const createAscii = async (count: number) => {
 
-	const pad = (num: number, size: number): string => {
-		const s = '0000000' + num;
-		return s.slice(s.length - size);
-	};
+	// const pad = (num: number, size: number): string => {
+	// 	const s = '0000000' + num;
+	// 	return s.slice(s.length - size);
+	// };
+	//
+	// let rendered = null;
+	//
+	// try {
+	// 	rendered = await Font.create(pad(count, 4), 'Doom');
+	//
+	// 	logger.info(rendered);
+	//
+	// } catch(err) {
+	// 	logger.error('failed to create ascii art');
+	// }
 
-	let rendered = null;
-
-	try {
-		rendered = await Font.create(pad(count, 4), 'Doom');
-
-		logger.info(rendered);
-
-	} catch(err) {
-		logger.error('failed to create ascii art');
-	}
-
-	return rendered;
+	// return rendered;
+	return '# votes: ' + count.toString();
 };
 
 const updateEmbedCountAdd = async (embed) => {
