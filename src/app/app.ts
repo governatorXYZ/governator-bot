@@ -6,7 +6,7 @@ import { createLogger } from './utils/logger';
 import constants from './constants/constants';
 import NodeEventSource from 'eventsource';
 import axios from 'axios';
-import { Cache } from './utils/cache';
+// import { Cache } from './utils/cache';
 
 // set api key header for axios globally
 axios.defaults.headers.common = {
@@ -20,7 +20,7 @@ const evtSource = new NodeEventSource(
 );
 
 // initialize cache
-export const cache = new Cache();
+// export const cache = new Cache();
 
 initializeGovernatorEvents();
 

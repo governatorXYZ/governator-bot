@@ -1,7 +1,7 @@
 import { TextChannel } from 'discord.js';
 import { createLogger } from '../../utils/logger';
 import { fetchPoll, fetchResultSum } from '../vote/Vote';
-import { cache } from '../../app';
+// import { cache } from '../../app';
 
 const logger = createLogger('CreatePoll');
 
@@ -52,7 +52,7 @@ export default async (event, client): Promise<void> => {
 	pollMessage.embeds[0].fields.forEach((field: any, index: number) => {
 
 		resultsMappedToEmojis.forEach((result) => {
-			if (field.value === result.poll_option_emoji) {
+			if (field.value.includes(result.poll_option_emoji)) {
 
 				logger.debug('Current value');
 				logger.data(parseInt(pollMessage.embeds[0].fields[index + 1].value));
@@ -65,7 +65,7 @@ export default async (event, client): Promise<void> => {
 	});
 
 	// TODO think about race condition
-	await pollMessage.edit({ embeds: pollMessage.embeds, components: [] });
+	await pollMessage.edit({ embeds: pollMessage.embeds[0].fields.push({ name: '`This poll has ended!`', value: '\u200B', inline: false }), components: [] });
 
-	cache.clear(pollId);
+	// cache.clear(pollId);
 };
