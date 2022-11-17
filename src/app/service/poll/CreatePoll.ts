@@ -1,8 +1,6 @@
 import Discord, { MessageActionRow, MessageButton, MessageEmbed, TextChannel } from 'discord.js';
 import { createLogger } from '../../utils/logger';
 import axios, { AxiosResponse } from 'axios';
-// import { createAscii } from '../vote/Vote';
-// import { cache } from '../../app';
 import moment from 'moment';
 
 const logger = createLogger('CreatePoll');
@@ -123,21 +121,6 @@ async function pollEmbed(poll, poll_options, EmojiList, id): Promise<MessageEmbe
 		msgEmbed.addField(`${EmojiList[index]} : ${option.poll_option_name}`, '\u200B', false);
 	});
 
-	// const ascii = await createAscii(0);
-	// msgEmbed.addField('\u200B', '-------------------------------------------------', false)
-	// msgEmbed.addField('\u200B', '\u200B', false);
-
-	// if (poll.client_config.find(config => config.provider_id === 'discord').role_restrictions.length > 0) {
-	// 	let st = '';
-	// 	for (const role of poll.client_config.find(config => config.provider_id === 'discord').role_restrictions) {
-	// 		st += `<@&${role}> `;
-	// 	}
-	//
-	// 	msgEmbed.addField('\u200B', '🚫 Role restrictions 🚫', false)
-	// 		.addField('\u200B', `<@&${st}>`, false)
-	// 		.addField('\u200B', '\u200B', false);
-	// }
-
 	poll.client_config.find(config => config.provider_id === 'discord').role_restrictions.forEach((role, index) => {
 		if (index === 0) {
 			msgEmbed.addField('\u200B', '🚫 Role restrictions 🚫', false);
@@ -151,8 +134,6 @@ async function pollEmbed(poll, poll_options, EmojiList, id): Promise<MessageEmbe
 
 	msgEmbed.addField('Strategy', ('`' + `${strategy.name}` + '`'), true)
 		.addField('# votes', '```' + '0000' + '```', true);
-
-	// cache.set(id, 0);
 
 	return msgEmbed;
 
