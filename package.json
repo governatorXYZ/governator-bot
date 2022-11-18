@@ -37,6 +37,7 @@
     "author": "BANKLESS DAO",
     "license": "MIT",
     "bugs": {
+        "url": "https://github.com/governatorXYZ/governator-bot/issues",
         "email": "governator@protonmail.com"
     },
     "homepage": "https://github.com/governatorXYZ/governator-bot/",

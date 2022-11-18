@@ -4,7 +4,7 @@
 
 ## How do I get the bot into my server?
 
-Get an invite-link from [governator.xyz](https://www.governator.xyz). We are currently beta testing. If you are interested to test in your server please sing up for the [waitlist](https://www.governator.xyz/waitlist).
+Get an invite-link from [governator.xyz](https://www.governator.xyz). We are currently beta testing. If you are interested to test in your server please sign up for the [waitlist](https://www.governator.xyz/waitlist).
 
 ## About
 
