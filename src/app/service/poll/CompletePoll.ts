@@ -1,22 +1,24 @@
 import { TextChannel } from 'discord.js';
 import { createLogger } from '../../utils/logger';
 import { fetchPoll, fetchResultSum } from '../vote/Vote';
-// import { cache } from '../../app';
+import moment from 'moment';
 
-const logger = createLogger('CreatePoll');
+const logger = createLogger('CompletePoll');
 
 export default async (event, client): Promise<void> => {
 
-	const pollId = event.data;
+	const eventData = JSON.parse(event.data);
 
-	logger.info(`received POLL_COMPLETE event for poll ID ${pollId}`);
+	logger.debug(eventData.poll_id);
 
-	const poll = await fetchPoll(pollId);
+	logger.info(`received POLL_COMPLETE event for poll ID ${eventData.poll_id}`);
+
+	const poll = await fetchPoll(eventData.poll_id);
 
 	const config = poll.client_config.find((conf) => conf.provider_id === 'discord');
 
 	if (!config.message_id) {
-		logger.error(`no message ID specified for poll ID ${pollId}`);
+		logger.error(`no message ID specified for poll ID ${eventData.poll_id}`);
 		return;
 	}
 
@@ -36,36 +38,40 @@ export default async (event, client): Promise<void> => {
 		return;
 	}
 
-	const results = await fetchResultSum(pollId);
+	const results = await fetchResultSum(eventData.poll_id);
 
-	const resultsMappedToEmojis = results.aggregate.map((result) => {
-		for (const pollOption of poll.poll_options) {
-			if (pollOption.poll_option_id === result._id) {
-				return { poll_option_id: pollOption.poll_option_id, percent: result.percent, poll_option_emoji: pollOption.poll_option_emoji };
-			}
-		}
+	const resultsMappedToEmojis = poll.poll_options.map((pollOption) => {
+		logger.debug('matching emojis');
+		logger.data ('poll option', pollOption);
+		const optionResult = results.aggregate.find(result => pollOption.poll_option_id === result._id);
+		if (!optionResult) 	return { poll_option_id: pollOption.poll_option_id, percent: '0', poll_option_value: `${pollOption.poll_option_emoji} : ${pollOption.poll_option_name}` };
+		else return { poll_option_id: pollOption.poll_option_id, percent: optionResult.percent, poll_option_value: `${pollOption.poll_option_emoji} : ${pollOption.poll_option_name}` };
+
 	});
 
 	logger.debug('results mapped to emojis');
 	logger.data(resultsMappedToEmojis);
 
-	pollMessage.embeds[0].fields.forEach((field: any, index: number) => {
+	const embed = pollMessage.embeds[0];
 
-		resultsMappedToEmojis.forEach((result) => {
-			if (field.value.includes(result.poll_option_emoji)) {
+	const ts = moment(poll.end_time).utc().format('X');
+	embed.setTitle(`${(results.aggregate.length > 0) ? '✅ ' : '❌'} Poll ended <t:${ts}:R> \n${poll.title}`);
 
-				logger.debug('Current value');
-				logger.data(parseInt(pollMessage.embeds[0].fields[index + 1].value));
-				logger.debug('Updated value');
-				logger.data(result.percent);
 
-				pollMessage.embeds[0].fields[index].value = `${field.value}:${result.percent} %`;
-			}
+	if(resultsMappedToEmojis) {
+		embed.fields.forEach((field: any, index: number) => {
+
+			resultsMappedToEmojis.forEach((result) => {
+				if (field.name === result.poll_option_value) {
+					embed.fields[index].name = `${field.name} : ${result.percent} %`;
+				}
+			});
 		});
-	});
 
-	// TODO think about race condition
-	await pollMessage.edit({ embeds: pollMessage.embeds[0].fields.push({ name: '`This poll has ended!`', value: '\u200B', inline: false }), components: [] });
-
-	// cache.clear(pollId);
+		// TODO think about race condition
+		await pollMessage.edit({ embeds: [embed], components: [] });
+	} else {
+		logger.error('resultsMappedToEmojis not defined');
+		await pollMessage.edit({ embeds: [embed], components: [] });
+	}
 };

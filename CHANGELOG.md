@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.3.0
+
+1. updated to current governator-api
+   1. Updated Poll schema
+   2. Update poll with message ID after POLL_CREATE
+   3. Respond to POLL_COMPLETE event
+   4. use new vote api (remove need for running strategy by client)
+   5. use new results api
+2. Fix REQUEST_CLIENT_DATA event handlers
+3. Add role gating
+4. poll embed improved layout
+   1. display vote count, final results, pfp, strategy, poll expiration and role gating
+5. ephemeral confirmation message improved UI
+6. remove unused dependencies
+7. update documentation
+
 ## 0.2.0
 
 1. SSE events and slash-create events initialized in similar manner as discordjs events

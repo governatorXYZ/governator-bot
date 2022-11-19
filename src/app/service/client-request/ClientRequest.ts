@@ -40,7 +40,6 @@ export default async (event, client): Promise<void> => {
 					}
 				}
 			});
-			// logger.data(filteredChannels);
 		}
 		await respondToDataRequest(dataRequest, mapIdToName(filteredChannels));
 		break;
@@ -77,8 +76,6 @@ const respondToDataRequest = async (dataRequest, data) => {
 			guildId: dataRequest.guildId,
 			data: data,
 		});
-
-		// console.log('dataPostEvent', dataPostEvent.data);
 
 		return dataPostEvent.data;
 
