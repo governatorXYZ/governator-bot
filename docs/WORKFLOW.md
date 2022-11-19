@@ -6,13 +6,10 @@ These are the major branches
 
 -   contains production ready code
 -   code that users are using
--   possible DAO impact if something is wrong
--   any new commit causes auto deployment
 
 2. develop
 
 -   contains multiple new features
--   auto deployment to shared environments like servers, databases, discords
 -   has code that is approved by reviewers
 
 3. feature/
@@ -25,7 +22,7 @@ These are the major branches
 
 -   contains code ready for production
 -   can be deployed to QA/UAT server
--   beta testers from DAO can be given access to test
+-   beta testers can be given access to test
 
 5. hotfix/x.x.x
 
@@ -58,6 +55,6 @@ These are the major branches
 ## PR raised to main
 
 -   production release
--   have a call with devs, SCOAP Squad, and relevant guild reps to make sure everything is smooth
+-   have a call with devs and relevant project reps to make sure everything is smooth
 
 https://nvie.com/posts/a-successful-git-branching-model/

@@ -6,6 +6,7 @@ import { createLogger } from './utils/logger';
 import constants from './constants/constants';
 import NodeEventSource from 'eventsource';
 import axios from 'axios';
+// import { Cache } from './utils/cache';
 
 // set api key header for axios globally
 axios.defaults.headers.common = {
@@ -17,6 +18,9 @@ const evtSource = new NodeEventSource(
 	constants.SSE_URL,
 	{ headers: { 'X-API-KEY': process.env.GOVERNATOR_API_KEY } },
 );
+
+// initialize cache
+// export const cache = new Cache();
 
 initializeGovernatorEvents();
 
@@ -159,9 +163,12 @@ function initializeGovernatorEvents(): void {
 		if (err) {
 			if (err.status === 401 || err.status === 403) {
 				logger.error('not authorized');
+			} else {
+				logger.error(err);
 			}
 		}
 	};
+
 	const eventFiles = fs.readdirSync(path.join(__dirname, '/events/events-governator')).filter(file => file.endsWith('.js'));
 	eventFiles.forEach(file => {
 		const event = new (require(`./events/events-governator/${file}`).default)();
@@ -169,7 +176,7 @@ function initializeGovernatorEvents(): void {
 			evtSource.addEventListener(event.name, async (...args) => event.execute(...args, client));
 			logger.debug(`Registered event ${event.name}`);
 		} catch (e) {
-			console.log(e);
+			logger.error(e);
 			logger.error('event failed to process', {
 				indexMeta: true,
 				meta: {
