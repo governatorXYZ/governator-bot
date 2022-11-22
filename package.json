@@ -47,7 +47,7 @@
         "discord.js": "^13.6.0",
         "dotenv": "^14.2.0",
         "ethers": "^5.7.2",
-        "eventsource": "^2.0.0",
+        "eventsource": "^2.0.2",
         "moment": "^2.29.4",
         "slash-create": "^5.4.1",
         "winston": "^3.7.2"
