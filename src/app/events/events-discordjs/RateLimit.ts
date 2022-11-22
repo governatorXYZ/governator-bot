@@ -1,14 +1,15 @@
 import { RateLimitData } from 'discord.js';
-import { DiscordEvent } from '../types/discord/DiscordEvent';
-import Log, { LogUtils } from '../utils/Log';
+import { DiscordEvent } from '../../types/discord/DiscordEvent';
+import { createLogger } from '../../utils/logger';
 
 export default class implements DiscordEvent {
 	name = 'rateLimit';
 	once = false;
-	
+	logger = createLogger(this.name);
+
 	async execute(rateLimitData: RateLimitData): Promise<any> {
 		try {
-			Log.warn(`rate limit reached timeout: ${rateLimitData.timeout}`, {
+			this.logger.warn(`rate limit reached timeout: ${rateLimitData.timeout}`, {
 				indexMeta: true,
 				meta: {
 					timeout: rateLimitData.timeout,
@@ -20,7 +21,7 @@ export default class implements DiscordEvent {
 				},
 			});
 		} catch (e) {
-			LogUtils.logError('failed to process event rateLimit', e);
+			this.logger.error('failed to process event rateLimit', e);
 		}
 	}
 }

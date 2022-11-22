@@ -4,19 +4,18 @@ import {
 	SlashCommand,
 	SlashCreator,
 } from 'slash-create';
-import HelpMe from '../../service/help/HelpMe';
-import { LogUtils } from '../../utils/Log';
+import GovInfo from '../../service/help/GovInfo';
 
 export default class Help extends SlashCommand {
 	constructor(creator: SlashCreator) {
 		super(creator, {
-			name: 'help',
-			description: 'Getting more info on help!',
+			name: 'gov',
+			description: 'Getting more info on governator-bot!',
 			options: [
 				{
-					name: 'me',
+					name: 'info',
 					type: CommandOptionType.SUB_COMMAND,
-					description: 'Information that might help me.',
+					description: 'Information that might governator poll.',
 				},
 			],
 			throttling: {
@@ -26,15 +25,14 @@ export default class Help extends SlashCommand {
 			defaultPermission: true,
 		});
 	}
-	
+
 	async run(ctx: CommandContext): Promise<any> {
-		LogUtils.logCommandStart(ctx);
 		if (ctx.user.bot) return;
-		
+
 		let messageOptions: MessageOptions;
 		switch (ctx.subcommands[0]) {
-		case 'me':
-			messageOptions = HelpMe();
+		case 'info':
+			messageOptions = GovInfo();
 			break;
 		}
 		return ctx.send(messageOptions);
