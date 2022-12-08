@@ -68,7 +68,10 @@ export default async (componentContext:ComponentContext): Promise<any> => {
 
 	const votes = await createVote(poll._id, voteParams);
 
-	if (votes.length === 0) return;
+	if (votes.length === 0) {
+		await componentContext.send({ content: 'No weights found' });
+		return;
+	};
 
 	await updateEmbedCount(poll._id, componentContext);
 
@@ -89,14 +92,24 @@ const formatMessage = (votes, poll) => {
 		pollOption = poll.poll_options.find(option => option.poll_option_id === voteData.poll_option_id);
 
 		st +=
-			'`' + 'option:' + '`' + ` ${pollOption.poll_option_emoji} : ${pollOption.poll_option_name} - `
-			+ '`' + 'account:' + '`' + ` ${voteData.account_id} (${voteData.provider_id}) - `
-			+ '`' + 'vote weight:' + '`' + ` ${poll.strategy_config[0].strategy_type === strategyTypes.STRATEGY_TYPE_TOKEN_WEIGHTED ? Math.round(Number(ethers.utils.formatEther(voteData.vote_power))) : voteData.vote_power } - `
-			+ '`' + 'method:' + '`' + ` ${vote.method} vote\n`;
+			'`' + 'option:' + '`' + ` ${ pollOption.poll_option_emoji } : ${ pollOption.poll_option_name } - `
+			+ '`' + 'account:' + '`' + ` ${ voteData.account_id } (${ voteData.provider_id }) - `
+			+ '`' + 'vote weight:' + '`' + ` ${ formatVotePower(poll, voteData.vote_power) } - `
+			+ '`' + 'method:' + '`' + ` ${ vote.method } vote\n`;
 
 	}
 	return st.substring(0, 2000);
 };
+
+const formatVotePower = (poll, votePower) => {
+	if (poll.strategy_config[0].strategy_type === strategyTypes.STRATEGY_TYPE_TOKEN_WEIGHTED) {
+		if (ethers.BigNumber.from(votePower).gt(ethers.BigNumber.from('10000'))) {
+			return ethers.utils.formatEther(ethers.BigNumber.from(votePower));
+		} 
+	}
+
+	return votePower
+}
 
 const noEthAccountLinked = async (componentContext) => {
 	// get all accounts from user object
