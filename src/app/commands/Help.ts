@@ -1,6 +1,5 @@
 import {
 	CommandContext,
-	MessageOptions,
 	SlashCommand,
 	SlashCreator,
 } from 'slash-create';
@@ -22,12 +21,8 @@ export default class Help extends SlashCommand {
 	async run(ctx: CommandContext): Promise<any> {
 		if (ctx.user.bot) return;
 
-		let messageOptions: MessageOptions;
-		switch (ctx.subcommands[0]) {
-		case 'info':
-			messageOptions = GovInfo();
-			break;
-		}
+		const messageOptions = GovInfo();
+		messageOptions.ephemeral = true;
 		return ctx.send(messageOptions);
 	}
 }
