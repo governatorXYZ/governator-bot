@@ -109,7 +109,7 @@ async function pollEmbed(poll, poll_options, EmojiList, id): Promise<EmbedBuilde
 	const ts = moment(poll.end_time).utc().format('X');
 
 	// TODO: add author to the embed (required endpoint to look up client ID based on goverator user ID from poll)
-	const msgEmbed = new Discord.EmbedBuilder().setTitle(`${poll.title} \nends <t:${ts}:R>`)
+	const msgEmbed = new Discord.EmbedBuilder().setTitle(`${poll.title} \n📅 ends <t:${ts}:R>`)
 		.setDescription(poll.description)
 		.setFooter({ text: id })
 		.setThumbnail(process.env.GOVERNATOR_LOGO_URL.toString())
