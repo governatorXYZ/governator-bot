@@ -1,4 +1,4 @@
-import Discord, { MessageActionRow, MessageButton, MessageEmbed, TextChannel } from 'discord.js';
+import Discord, { ActionRowBuilder, ButtonBuilder, EmbedBuilder, TextChannel, ButtonStyle, APIMessageActionRowComponent } from 'discord.js';
 import { createLogger } from '../../utils/logger';
 import axios, { AxiosResponse } from 'axios';
 import moment from 'moment';
@@ -40,7 +40,7 @@ export default async (event, client): Promise<void> => {
 
 	logger.data('usedEmojis', usedEmojis);
 
-	const row = new MessageActionRow();
+	const row = new ActionRowBuilder<ButtonBuilder>();
 
 	const dest = await client.channels.fetch(clientConfig.channel_id).catch((e) => {
 		logger.error(e);
@@ -53,10 +53,10 @@ export default async (event, client): Promise<void> => {
 
 	polls.forEach((option: any, index: number) => {
 		row.addComponents(
-			new MessageButton()
+			new ButtonBuilder()
 				.setCustomId(`${poll._id}:${option}`)
 				.setLabel(`${EmojiList[index]}`)
-				.setStyle('PRIMARY'),
+				.setStyle(ButtonStyle.Primary),
 		);
 	});
 
@@ -102,38 +102,42 @@ const updatePoll = async (poll, messageId) => {
 };
 
 
-async function pollEmbed(poll, poll_options, EmojiList, id): Promise<MessageEmbed> {
+async function pollEmbed(poll, poll_options, EmojiList, id): Promise<EmbedBuilder> {
 
 	const strategy = await fetchStrategy(poll.strategy_config[0].strategy_id);
 
 	const ts = moment(poll.end_time).utc().format('X');
 
 	// TODO: add author to the embed (required endpoint to look up client ID based on goverator user ID from poll)
-	const msgEmbed = new Discord.MessageEmbed().setTitle(`${poll.title} \nends <t:${ts}:R>`)
+	const msgEmbed = new Discord.EmbedBuilder().setTitle(`${poll.title} \nends <t:${ts}:R>`)
 		.setDescription(poll.description)
 		.setFooter({ text: id })
 		.setThumbnail(process.env.GOVERNATOR_LOGO_URL.toString())
-		.addField('\u200B', '\u200B', false);
+		.addFields([
+			{ name: '\u200B', value: '\u200B', inline: false },
+		]);
 
 	logger.info(`poll end time: ${poll.end_time}, timestamp: ${ts}`);
 
 	poll_options.forEach((option: any, index: number) =>{
-		msgEmbed.addField(`${EmojiList[index]} : ${option.poll_option_name}`, '\u200B', false);
+		msgEmbed.addFields([{ name: `${EmojiList[index]} : ${option.poll_option_name}`, value: '\u200B', inline: false }]);
 	});
 
 	poll.client_config.find(config => config.provider_id === 'discord').role_restrictions.forEach((role, index) => {
 		if (index === 0) {
-			msgEmbed.addField('\u200B', '🚫 Role restrictions 🚫', false);
+			msgEmbed.addFields([{ name: '\u200B', value: '🚫 Role restrictions 🚫', inline: false }]);
 		}
-		msgEmbed.addField('\u200B', `<@&${role}>`, false);
+		msgEmbed.addFields([{ name: '\u200B', value: `<@&${role}>`, inline: false}]);
 
 		if (index === (poll.client_config.find(config => config.provider_id === 'discord').role_restrictions.length - 1)) {
-			msgEmbed.addField('\u200B', '\u200B', false);
+			msgEmbed.addFields([{ name: '\u200B', value: '\u200B', inline: false }]);
 		}
 	});
 
-	msgEmbed.addField('Strategy', ('`' + `${strategy.name}` + '`'), true)
-		.addField('# votes', '```' + '0000' + '```', true);
+	msgEmbed.addFields([
+		{ name: 'Strategy', value: ('`' + `${strategy.name}` + '`'), inline: true},
+		{ name: '# votes', value: '```' + '0000' + '```', inline: true},
+	]);
 
 	return msgEmbed;
 

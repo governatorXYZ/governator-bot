@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.0
+
+1. update to discord.js14 & other dependencies
+
 ## 0.3.0
 
 1. updated to current governator-api

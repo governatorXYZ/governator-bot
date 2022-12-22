@@ -1,4 +1,13 @@
-import { Collection, Guild, GuildChannel, Role, Snowflake, TextChannel, ThreadChannel } from 'discord.js';
+import { 
+	Collection,
+	Guild,
+	GuildChannel,
+	Role,
+	Snowflake,
+	TextChannel,
+	ThreadChannel,
+	ChannelType
+ } from 'discord.js';
 import axios from 'axios';
 import { createLogger } from '../../utils/logger';
 
@@ -33,7 +42,7 @@ export default async (event, client): Promise<void> => {
 		if (guildChannels) {
 
 			guildChannels.forEach((channel, key) => {
-				if (channel.isText() && (!channel.isThread())) {
+				if (channel.type === ChannelType.GuildText && (![ChannelType.PublicThread, ChannelType.PrivateThread].includes(channel.type))) {
 					const member = (channel as TextChannel).members.get(dataRequest.userId);
 					if (member) {
 						return filteredChannels.set(key, guildChannels.get(key));
