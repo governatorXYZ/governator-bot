@@ -1,6 +1,5 @@
 import {
 	CommandContext,
-	CommandOptionType, MessageOptions,
 	SlashCommand,
 	SlashCreator,
 } from 'slash-create';
@@ -21,6 +20,6 @@ export default class Help extends SlashCommand {
 	async run(ctx: CommandContext): Promise<any> {
 		if (ctx.user.bot) return;
 
-		return ctx.send({content: 'In order to create a poll, login to https://governator.xyz'});
+		return ctx.send({ content: 'In order to create a poll, login to https://governator.xyz' });
 	}
 }

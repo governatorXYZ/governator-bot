@@ -1,23 +1,16 @@
 import {
 	CommandContext,
-	CommandOptionType, MessageOptions,
+	MessageOptions,
 	SlashCommand,
 	SlashCreator,
 } from 'slash-create';
-import GovInfo from '../../service/help/GovInfo';
+import GovInfo from '../service/help/GovInfo';
 
 export default class Help extends SlashCommand {
 	constructor(creator: SlashCreator) {
 		super(creator, {
-			name: 'gov',
-			description: 'Getting more info on governator-bot!',
-			options: [
-				{
-					name: 'info',
-					type: CommandOptionType.SUB_COMMAND,
-					description: 'Information that might governator poll.',
-				},
-			],
+			name: 'help',
+			description: 'where to get help',
 			throttling: {
 				usages: 3,
 				duration: 1,
