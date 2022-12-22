@@ -4,7 +4,6 @@
  */
 
 module.exports = {
-	preset: '@shelf/jest-mongodb',
 	clearMocks: true,
 	collectCoverage: true,
 	coverageDirectory: 'coverage',
