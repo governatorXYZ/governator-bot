@@ -3,19 +3,19 @@ import { DiscordEvent } from '../../types/discord/DiscordEvent';
 import { createLogger } from '../../utils/logger';
 
 export default class implements DiscordEvent {
-	name = 'rateLimit';
+	name = 'rateLimited';
 	once = false;
 	logger = createLogger(this.name);
 
 	async execute(rateLimitData: RateLimitData): Promise<any> {
 		try {
-			this.logger.warn(`rate limit reached timeout: ${rateLimitData.timeout}`, {
+			this.logger.warn(`rate limit reached timeout: ${rateLimitData.timeToReset}`, {
 				indexMeta: true,
 				meta: {
-					timeout: rateLimitData.timeout,
+					timeToReset: rateLimitData.timeToReset,
 					limit: rateLimitData.limit,
 					method: rateLimitData.method,
-					path: rateLimitData.path,
+					url: rateLimitData.url,
 					route: rateLimitData.route,
 					global: rateLimitData.global,
 				},
