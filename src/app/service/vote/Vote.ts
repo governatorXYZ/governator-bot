@@ -15,11 +15,14 @@ export default async (componentContext:ComponentContext): Promise<any> => {
 
 	// fetch poll from db
 	const poll = await fetchPoll(pollId);
+	const clientConfig = poll.client_config.find((obj) => {
+		return obj.provider_id === 'discord';
+	});
 
 	if (!poll) return;
 
-	if (poll.role_restrictions && poll.role_restrictions.length > 0) {
-		if (await roleRestricted(componentContext, poll.role_restrictions)) {
+	if (clientConfig.role_restrictions && clientConfig.role_restrictions.length > 0) {
+		if (await roleRestricted(componentContext, clientConfig.role_restrictions)) {
 			await componentContext.send({ content: 'You do not have the required role to vote on this poll' });
 			return;
 		}
@@ -56,7 +59,10 @@ export default async (componentContext:ComponentContext): Promise<any> => {
 
 	// if token weighted poll, verify if account has wallet linked
 	if (await noEthAccountLinked(componentContext) && (poll.strategy_config[0].strategy_type === strategyTypes.STRATEGY_TYPE_TOKEN_WEIGHTED)) {
-		await componentContext.send({ content: 'No verified ethereum accounts found. Please link & verify your wallet to enable token voting: <https://www.governator.xyz>' });
+		await componentContext.send({ 
+			content: 'No verified ethereum accounts found. To enable token voting, please ' + 
+			'connect & verify your wallet on [governator.xyz](https://www.governator.xyz/account)' 
+		});
 		return;
 	}
 
@@ -69,7 +75,7 @@ export default async (componentContext:ComponentContext): Promise<any> => {
 	const votes = await createVote(poll._id, voteParams);
 
 	if (votes.length === 0) {
-		await componentContext.send({ content: 'No weights found' });
+		await componentContext.send({ content: 'No tokens found with your account(s).' });
 		return;
 	};
 
@@ -113,7 +119,7 @@ const formatVotePower = (poll, votePower) => {
 
 const noEthAccountLinked = async (componentContext) => {
 	// get all accounts from user object
-	const user = await fetchUser(componentContext.user.id).catch((e) => {
+	const user = await fetchDiscordUser(componentContext.user.id).catch((e) => {
 		logger.error(e);
 		return null;
 	});
@@ -181,8 +187,8 @@ const updateEmbedCount = async (pollId, componentContext) => {
 };
 
 // FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
-const createVote = async (poll_id, voteParams) => {
-	const voteRequestEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/vote/${poll_id}`;
+const createVote = async (pollId, voteParams) => {
+	const voteRequestEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/vote/${pollId}`;
 
 	logger.debug({
 		poll_option_id: voteParams.poll_option_id,
@@ -210,8 +216,8 @@ const createVote = async (poll_id, voteParams) => {
 };
 
 // FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
-export const fetchPoll = async (poll_id) => {
-	const getPollByIdEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/poll/${poll_id}`;
+export const fetchPoll = async (pollId) => {
+	const getPollByIdEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/poll/${pollId}`;
 
 	try {
 		const poll: AxiosResponse = await axios.get(getPollByIdEndpoint);
@@ -248,8 +254,27 @@ const fetchAccount = async (clientAccountId) => {
 };
 
 // FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
-const fetchUser = async (clientAccountId) => {
+const fetchDiscordUser = async (clientAccountId) => {
 	const userGetEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/user/discord/${clientAccountId}`;
+
+	try {
+		const user: AxiosResponse = await axios.get(userGetEndpoint);
+
+		logger.info('Fetched user');
+		logger.data('Fetched user', user.data);
+
+		return user.data;
+
+	} catch (e) {
+		logger.error('Failed to fetch user', e);
+
+		return null;
+	}
+};
+
+// FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
+export const fetchGovernatorUser = async (governatorUserId) => {
+	const userGetEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/user/${governatorUserId}`;
 
 	try {
 		const user: AxiosResponse = await axios.get(userGetEndpoint);

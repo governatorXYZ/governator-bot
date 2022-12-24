@@ -1,11 +1,20 @@
-import Discord, { ActionRowBuilder, ButtonBuilder, EmbedBuilder, TextChannel, ButtonStyle, APIMessageActionRowComponent } from 'discord.js';
+import Discord, { 
+	Client,
+	ActionRowBuilder,
+	ButtonBuilder,
+	EmbedBuilder,
+	TextChannel,
+	ButtonStyle,
+	User
+} from 'discord.js';
 import { createLogger } from '../../utils/logger';
 import axios, { AxiosResponse } from 'axios';
 import moment from 'moment';
+import { fetchGovernatorUser } from '../vote/Vote'
 
 const logger = createLogger('CreatePoll');
 
-export default async (event, client): Promise<void> => {
+export default async (event, client: Client): Promise<void> => {
 	const emojiInfo = {};
 
 	const poll = JSON.parse(event.data);
@@ -49,14 +58,37 @@ export default async (event, client): Promise<void> => {
 
 	if (!dest) return;
 
-	const msgEmbed = await pollEmbed(poll, poll_options, EmojiList, poll._id);
+	const govUser = await fetchGovernatorUser(poll.author_user_id).catch((e) =>{
+		logger.error('failed to fetch governator user')
+		return null;
+	});
+
+	logger.data(govUser)
+
+	const authorDiscordUserId = govUser ? 
+		(govUser.provider_accounts.find(account => account.provider_id === 'discord' ))._id :
+		null;
+
+	logger.data(authorDiscordUserId)
+
+	const author = authorDiscordUserId ? 
+		await client.users.fetch(authorDiscordUserId).catch((e) => {
+			logger.error(e);
+			return null;
+		}) as User :
+		null;
+
+	logger.data(author.username)
+
+
+	const msgEmbed = await pollEmbed(author, poll, poll_options, EmojiList, poll._id);
 
 	polls.forEach((option: any, index: number) => {
 		row.addComponents(
 			new ButtonBuilder()
 				.setCustomId(`${poll._id}:${option}`)
 				.setLabel(`${EmojiList[index]}`)
-				.setStyle(ButtonStyle.Primary),
+				.setStyle(ButtonStyle.Secondary),
 		);
 	});
 
@@ -102,15 +134,16 @@ const updatePoll = async (poll, messageId) => {
 };
 
 
-async function pollEmbed(poll, poll_options, EmojiList, id): Promise<EmbedBuilder> {
+async function pollEmbed(user: User, poll, poll_options, EmojiList, id): Promise<EmbedBuilder> {
 
 	const strategy = await fetchStrategy(poll.strategy_config[0].strategy_id);
 
 	const ts = moment(poll.end_time).utc().format('X');
 
 	// TODO: add author to the embed (required endpoint to look up client ID based on goverator user ID from poll)
-	const msgEmbed = new Discord.EmbedBuilder().setTitle(`${poll.title} \n📅 ends <t:${ts}:R>`)
+	const msgEmbed = new Discord.EmbedBuilder().setTitle(`${poll.title}`)
 		.setDescription(poll.description)
+		.setAuthor(user ? { name: user.username, iconURL: user.avatarURL() } : {name: '', iconURL: ''})
 		.setFooter({ text: id })
 		.setThumbnail(process.env.GOVERNATOR_LOGO_URL.toString())
 		.addFields([
@@ -135,8 +168,9 @@ async function pollEmbed(poll, poll_options, EmojiList, id): Promise<EmbedBuilde
 	});
 
 	msgEmbed.addFields([
-		{ name: 'Strategy', value: ('`' + `${strategy.name}` + '`'), inline: true},
-		{ name: '# votes', value: '```' + '0000' + '```', inline: true},
+		{ name: `📅 Ends`, value: `<t:${ts}:R>`, inline: false},
+		{ name: '♜ Strategy', value: ('```' + strategy.name + '```'), inline: true},
+		{ name: '🗳️ Votes', value: '```' + '0000' + '```', inline: false},
 	]);
 
 	return msgEmbed;

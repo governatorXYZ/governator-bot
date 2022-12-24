@@ -3,6 +3,9 @@
 ## 0.4.0
 
 1. update to discord.js14 & other dependencies
+2. update bot messages
+3. update poll embed layout
+4. handle POLL_DELETE event
 
 ## 0.3.0
 

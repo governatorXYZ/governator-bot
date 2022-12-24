@@ -1,4 +1,4 @@
-import { TextChannel } from 'discord.js';
+import { TextChannel, Message, Embed, EmbedBuilder } from 'discord.js';
 import { createLogger } from '../../utils/logger';
 import { fetchPoll, fetchResultSum } from '../vote/Vote';
 import moment from 'moment';
@@ -9,9 +9,7 @@ export default async (event, client): Promise<void> => {
 
 	const eventData = JSON.parse(event.data);
 
-	logger.debug(eventData.poll_id);
-
-	logger.info(`received POLL_COMPLETE event for poll ID ${eventData.poll_id}`);
+	logger.info(`processing POLL_COMPLETE event for poll ID ${eventData.poll_id}`);
 
 	const poll = await fetchPoll(eventData.poll_id);
 
@@ -30,7 +28,7 @@ export default async (event, client): Promise<void> => {
 		return;
 	}
 
-	let pollMessage;
+	let pollMessage: Message;
 	try {
 		pollMessage = await pollChannel.messages.fetch(config.message_id);
 	} catch {
@@ -52,26 +50,35 @@ export default async (event, client): Promise<void> => {
 	logger.debug('results mapped to emojis');
 	logger.data(resultsMappedToEmojis);
 
-	const embed = pollMessage.embeds[0];
-
 	const ts = moment(poll.end_time).utc().format('X');
-	embed.setTitle(`${(results.aggregate.length > 0) ? '✅ ' : '❌'} Poll ended <t:${ts}:R> \n${poll.title}`);
 
+	const embed: Embed = pollMessage.embeds[0];
+
+	const updateEmbed = new EmbedBuilder();
+
+	updateEmbed.setTitle(`${(results.aggregate.length > 0) ? '✅ ' : '❌'} ${poll.title}`)
+	.setDescription(embed.description)
+	.setAuthor(embed.author)
+	.setFooter(embed.footer)
+	.setThumbnail(embed.thumbnail.url)
+	.addFields(embed.fields)
+	.spliceFields(-3, 1, { name: `📅 ended <t:${ts}:R>`, value: '\u200B', inline: false})
 
 	if(resultsMappedToEmojis) {
 		embed.fields.forEach((field: any, index: number) => {
 
 			resultsMappedToEmojis.forEach((result) => {
 				if (field.name === result.poll_option_value) {
-					embed.fields[index].name = `${field.name} : ${result.percent} %`;
+					// embed.fields[index].name = `${field.name} : ${result.percent} %`;
+					updateEmbed.spliceFields(index, 1, { name: `${field.name} : ${result.percent} %`, value: '\u200B', inline: false })
 				}
 			});
 		});
 
 		// TODO think about race condition
-		await pollMessage.edit({ embeds: [embed], components: [] });
+		await pollMessage.edit({ embeds: [updateEmbed], components: [] });
 	} else {
 		logger.error('resultsMappedToEmojis not defined');
-		await pollMessage.edit({ embeds: [embed], components: [] });
+		await pollMessage.edit({ embeds: [updateEmbed], components: [] });
 	}
 };
