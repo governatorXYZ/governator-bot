@@ -1,6 +1,5 @@
-import { TextChannel, Message, Embed, EmbedBuilder } from 'discord.js';
+import { TextChannel, Message } from 'discord.js';
 import { createLogger } from '../../utils/logger';
-import { fetchPoll } from '../vote/Vote';
 
 const logger = createLogger('DeletePoll');
 
