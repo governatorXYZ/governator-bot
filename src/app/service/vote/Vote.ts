@@ -4,6 +4,7 @@ import { createLogger } from '../../utils/logger';
 import client from '../../app';
 import { ethers } from 'ethers';
 import { strategyTypes } from '../../constants/constants';
+import Api from '../../utils/api'
 
 const logger = createLogger('Vote');
 
@@ -188,7 +189,7 @@ const updateEmbedCount = async (pollId, componentContext) => {
 
 // FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
 const createVote = async (pollId, voteParams) => {
-	const voteRequestEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/vote/${pollId}`;
+	const voteRequestEndpoint = `${Api.getBasePath()}/vote/${pollId}`;
 
 	logger.debug({
 		poll_option_id: voteParams.poll_option_id,
@@ -217,7 +218,7 @@ const createVote = async (pollId, voteParams) => {
 
 // FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
 export const fetchPoll = async (pollId) => {
-	const getPollByIdEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/poll/${pollId}`;
+	const getPollByIdEndpoint = `${Api.getBasePath()}/poll/${pollId}`;
 
 	try {
 		const poll: AxiosResponse = await axios.get(getPollByIdEndpoint);
@@ -236,7 +237,7 @@ export const fetchPoll = async (pollId) => {
 
 // FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
 const fetchAccount = async (clientAccountId) => {
-	const accountGetEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/account/discord/get-by-account-id/${clientAccountId}`;
+	const accountGetEndpoint = `${Api.getBasePath()}/account/discord/get-by-account-id/${clientAccountId}`;
 
 	try {
 		const account: AxiosResponse = await axios.get(accountGetEndpoint);
@@ -255,7 +256,7 @@ const fetchAccount = async (clientAccountId) => {
 
 // FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
 const fetchDiscordUser = async (clientAccountId) => {
-	const userGetEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/user/discord/${clientAccountId}`;
+	const userGetEndpoint = `${Api.getBasePath()}/user/discord/${clientAccountId}`;
 
 	try {
 		const user: AxiosResponse = await axios.get(userGetEndpoint);
@@ -274,7 +275,7 @@ const fetchDiscordUser = async (clientAccountId) => {
 
 // FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
 export const fetchGovernatorUser = async (governatorUserId) => {
-	const userGetEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/user/${governatorUserId}`;
+	const userGetEndpoint = `${Api.getBasePath()}/user/${governatorUserId}`;
 
 	try {
 		const user: AxiosResponse = await axios.get(userGetEndpoint);
@@ -293,7 +294,7 @@ export const fetchGovernatorUser = async (governatorUserId) => {
 
 // FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
 const createAccount = async (id, username) => {
-	const accountCreateEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/account/discord/create`;
+	const accountCreateEndpoint = `${Api.getBasePath()}/account/discord/create`;
 
 	try {
 		const account: AxiosResponse = await axios.post(accountCreateEndpoint, {
@@ -315,7 +316,7 @@ const createAccount = async (id, username) => {
 
 // FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
 export const fetchResultSum = async (pollId) => {
-	const resultsSumGetEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/vote/results/sum/${pollId}`;
+	const resultsSumGetEndpoint = `${Api.getBasePath()}/vote/results/sum/${pollId}`;
 
 	try {
 		const results: AxiosResponse = await axios.get(resultsSumGetEndpoint);
@@ -334,7 +335,7 @@ export const fetchResultSum = async (pollId) => {
 
 // FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
 export const fetchResultPerUserCount = async (pollId) => {
-	const resultsSumGetEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/vote/results/votes-per-user/count/${pollId}`;
+	const resultsSumGetEndpoint = `${Api.getBasePath()}/vote/results/votes-per-user/count/${pollId}`;
 
 	try {
 		const results: AxiosResponse = await axios.get(resultsSumGetEndpoint);

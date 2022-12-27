@@ -11,6 +11,7 @@ import { createLogger } from '../../utils/logger';
 import axios, { AxiosResponse } from 'axios';
 import moment from 'moment';
 import { fetchGovernatorUser } from '../vote/Vote'
+import Api from '../../utils/api'
 
 const logger = createLogger('CreatePoll');
 
@@ -107,7 +108,7 @@ export default async (event, client: Client): Promise<void> => {
 };
 
 const updatePoll = async (poll, messageId) => {
-	const pollPatchEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/poll/update/${poll._id}`;
+	const pollPatchEndpoint = `${Api.getBasePath()}/poll/update/${poll._id}`;
 
 	poll.client_config.forEach((conf) => {
 		if (conf.provider_id === 'discord') {
@@ -178,7 +179,7 @@ async function pollEmbed(user: User, poll, poll_options, EmojiList, id): Promise
 }
 
 const fetchStrategy = async (strategyId) => {
-	const strategyGetEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/strategies/find/one/${strategyId}`;
+	const strategyGetEndpoint = `${Api.getBasePath()}/strategies/find/one/${strategyId}`;
 
 	try {
 		const strategy: AxiosResponse = await axios.get(strategyGetEndpoint);
