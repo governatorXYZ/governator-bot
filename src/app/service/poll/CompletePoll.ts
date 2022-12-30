@@ -38,13 +38,16 @@ export default async (event, client): Promise<void> => {
 
 	const results = await fetchResultSum(eventData.poll_id);
 
+	let winner = 0;
 	const resultsMappedToEmojis = poll.poll_options.map((pollOption) => {
 		logger.debug('matching emojis');
 		logger.data ('poll option', pollOption);
 		const optionResult = results.aggregate.find(result => pollOption.poll_option_id === result._id);
-		if (!optionResult) 	return { poll_option_id: pollOption.poll_option_id, percent: '0', poll_option_value: `${pollOption.poll_option_emoji} : ${pollOption.poll_option_name}` };
-		else return { poll_option_id: pollOption.poll_option_id, percent: optionResult.percent, poll_option_value: `${pollOption.poll_option_emoji} : ${pollOption.poll_option_name}` };
-
+		if (!optionResult) 	return { poll_option_id: pollOption.poll_option_id, percent: '0', poll_option_value: `${pollOption.poll_option_emoji} ${pollOption.poll_option_name}` };
+		else {
+			if (Number(optionResult.percent) > winner) winner = Number(optionResult.percent);
+			return { poll_option_id: pollOption.poll_option_id, percent: optionResult.percent, poll_option_value: `${pollOption.poll_option_emoji} ${pollOption.poll_option_name}` };
+		}
 	});
 
 	logger.debug('results mapped to emojis');
@@ -62,15 +65,22 @@ export default async (event, client): Promise<void> => {
 	.setFooter(embed.footer)
 	.setThumbnail(embed.thumbnail.url)
 	.addFields(embed.fields)
-	.spliceFields(-3, 1, { name: `📅 ended <t:${ts}:R>`, value: '\u200B', inline: false})
+	.spliceFields(-1, 1, { name: `📅 Ended <t:${ts}:R>`, value: '\u200B', inline: false})
 
 	if(resultsMappedToEmojis) {
 		embed.fields.forEach((field: any, index: number) => {
 
 			resultsMappedToEmojis.forEach((result) => {
 				if (field.name === result.poll_option_value) {
-					// embed.fields[index].name = `${field.name} : ${result.percent} %`;
-					updateEmbed.spliceFields(index, 1, { name: `${field.name} : ${result.percent} %`, value: '\u200B', inline: false })
+					updateEmbed.spliceFields(
+						index, 
+						1, 
+						{ 
+							name: `${field.name} ${result.percent} % ${(Number(result.percent) === winner) && (winner > 0) ? '🎉' : ''}`, 
+							value: '\u200B', 
+							inline: false 
+						}
+					)
 				}
 			});
 		});

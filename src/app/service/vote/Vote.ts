@@ -86,23 +86,33 @@ export default async (componentContext:ComponentContext): Promise<any> => {
 };
 
 const formatMessage = (votes, poll) => {
-	let st = 'Your vote: \n';
+	let st = '';
 	let pollOption: any;
 	for (const vote of votes) {
-		let voteData: any;
-		if (vote.method === 'update') {
-			voteData = vote.data.updatedVote;
-		} else {
-			voteData = vote.data;
+
+		let voteData = vote.data;
+		let methodSt: string;
+		switch (vote.method) {
+			case 'create':
+				methodSt = 'secretly cast'
+				break;
+			case 'update':
+				methodSt = 'updated'
+				voteData = vote.data.updatedVote;
+				break;
+			case 'delete':
+				methodSt = 'removed'
+				break;
 		}
+
+		st = `Your vote has been ${methodSt}; results will be calculated and revealed when the poll ends. \n\n`;
 
 		pollOption = poll.poll_options.find(option => option.poll_option_id === voteData.poll_option_id);
 
 		st +=
-			'`' + 'option:' + '`' + ` ${ pollOption.poll_option_emoji } : ${ pollOption.poll_option_name } - `
-			+ '`' + 'account:' + '`' + ` ${ voteData.account_id } (${ voteData.provider_id }) - `
-			+ '`' + 'vote weight:' + '`' + ` ${ formatVotePower(poll, voteData.vote_power) } - `
-			+ '`' + 'method:' + '`' + ` ${ vote.method } vote\n`;
+			'`' + 'Option:' + '`' + ` ${ pollOption.poll_option_emoji } : ${ pollOption.poll_option_name }\n`
+			+ '`' + 'Voting Weight:' + '`' + ` ${ formatVotePower(poll, voteData.vote_power) }\n`
+			// + '`' + 'Account:' + '`' + ` ${ voteData.account_id } (${ voteData.provider_id })`
 
 	}
 	return st.substring(0, 2000);
@@ -110,12 +120,23 @@ const formatMessage = (votes, poll) => {
 
 const formatVotePower = (poll, votePower) => {
 	if (poll.strategy_config[0].strategy_type === strategyTypes.STRATEGY_TYPE_TOKEN_WEIGHTED) {
+
 		if (ethers.BigNumber.from(votePower).gt(ethers.BigNumber.from('10000'))) {
-			return ethers.utils.formatEther(ethers.BigNumber.from(votePower));
+			console.log(votePower)
+
+			return truncate(ethers.utils.formatEther(ethers.BigNumber.from(votePower)), 2);
 		} 
 	}
 
 	return votePower
+}
+
+function truncate(str, maxDecimalDigits) {
+    if (str.includes('.')) {
+        const parts = str.split('.');
+        return parts[0] + '.' + parts[1].slice(0, maxDecimalDigits);
+    }
+    return str;
 }
 
 const noEthAccountLinked = async (componentContext) => {
@@ -178,7 +199,7 @@ const updateEmbedCount = async (pollId, componentContext) => {
 
 	const embed = componentContext.message.embeds[0];
 
-	embed.fields[componentContext.message.embeds[0].fields.length - 1].value = '```' + `${pad(count, 4)}` + '```';
+	embed.fields[componentContext.message.embeds[0].fields.length - 2].value = '```' + `${pad(count, 4)}` + '```';
 
 	const msg = componentContext.message;
 

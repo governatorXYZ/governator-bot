@@ -135,7 +135,7 @@ const updatePoll = async (poll, messageId) => {
 };
 
 
-async function pollEmbed(user: User, poll, poll_options, EmojiList, id): Promise<EmbedBuilder> {
+const pollEmbed = async (user: User, poll, poll_options, EmojiList, id): Promise<EmbedBuilder> => {
 
 	const strategy = await fetchStrategy(poll.strategy_config[0].strategy_id);
 
@@ -154,12 +154,15 @@ async function pollEmbed(user: User, poll, poll_options, EmojiList, id): Promise
 	logger.info(`poll end time: ${poll.end_time}, timestamp: ${ts}`);
 
 	poll_options.forEach((option: any, index: number) =>{
-		msgEmbed.addFields([{ name: `${EmojiList[index]} : ${option.poll_option_name}`, value: '\u200B', inline: false }]);
+		msgEmbed.addFields([{ name: `${EmojiList[index]} ${option.poll_option_name}`, value: '\u200B', inline: false }]);
+		// if (index === poll_options.length - 1) {
+		// 	msgEmbed.addFields([{ name: '\u200B', value: spacer(10), inline: false }]);
+		// }
 	});
 
 	poll.client_config.find(config => config.provider_id === 'discord').role_restrictions.forEach((role, index) => {
 		if (index === 0) {
-			msgEmbed.addFields([{ name: '\u200B', value: '🚫 Role restrictions 🚫', inline: false }]);
+			msgEmbed.addFields([{ name: '\u200B', value: '🚫 **Role restrictions**', inline: false }]);
 		}
 		msgEmbed.addFields([{ name: '\u200B', value: `<@&${role}>`, inline: false}]);
 
@@ -169,13 +172,20 @@ async function pollEmbed(user: User, poll, poll_options, EmojiList, id): Promise
 	});
 
 	msgEmbed.addFields([
-		{ name: `📅 Ends`, value: `<t:${ts}:R>`, inline: false},
 		{ name: '♜ Strategy', value: ('```' + strategy.name + '```'), inline: true},
-		{ name: '🗳️ Votes', value: '```' + '0000' + '```', inline: false},
+		{ name: '🗳️ Votes', value: '```' + '0000' + '```', inline: true},
+		{ name: `📅 Ends <t:${ts}:R>`, value: '\u200B', inline: false},
 	]);
 
 	return msgEmbed;
+}
 
+const spacer = (len: Number) => {
+	let st = '';
+	for (let i = 0; i < len; i++) {
+		st += '.o0o.';
+	}
+	return st;
 }
 
 const fetchStrategy = async (strategyId) => {
