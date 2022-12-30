@@ -104,11 +104,12 @@ dist
 # TernJS port file
 .tern-port
 
-### IntelliJ Idea ###
+# IDE #
 .idea
 *.iws
 *.iml
 *.ipr
+.vscode
 
 build
 
