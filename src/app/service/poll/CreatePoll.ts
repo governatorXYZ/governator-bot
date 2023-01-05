@@ -78,12 +78,6 @@ export default async (poll: PollResponseDto, client: Client): Promise<void> => {
         return account.provider_id === 'discord';
     }) as DiscordAccountResponseDto;
 
-    // const authorDiscordUserId = govUser.provider_accounts ?
-    //     (govUser.provider_accounts.find((account) => {
-    //         account.provider_id === 'discord';
-    //     }))?._id :
-    //     null;
-
     logger.data('authorDiscordUserId', discordAccount._id);
 
     const author = await client.users.fetch(discordAccount._id).catch((e) => {
@@ -145,20 +139,6 @@ const updatePoll = async (poll: PollResponseDto, messageId: string): Promise<voi
         logger.error('failed to update poll', e);
         return null;
     });
-
-    // try {
-    //     const newPoll: AxiosResponse = await axios.patch(pollPatchEndpoint, { client_config: poll.client_config });
-
-    //     logger.info('Poll patch posted');
-    //     logger.data('Poll patch:', newPoll.data);
-
-    //     return newPoll.data;
-
-    // } catch (e) {
-    //     logger.error('poll patch failed', e);
-
-    //     return null;
-    // }
 };
 
 interface PollEmbedParams {
@@ -214,23 +194,3 @@ const pollEmbed = async (pollEmbedParams: PollEmbedParams): Promise<EmbedBuilder
 
     return msgEmbed;
 };
-
-// const fetchStrategy = async (strategyId: string) => {
-
-//     Api.strategy.daoPunksStrategyGet(strategyId);
-//     // const strategyGetEndpoint = `${Api.getBasePath()}/strategies/find/one/${strategyId}`;
-
-//     // try {
-//     // 	const strategy: AxiosResponse = await axios.get(strategyGetEndpoint);
-
-//     // 	logger.info('Fetched strategy');
-//     // 	logger.data('Fetched strategy', strategy.data);
-
-//     // 	return strategy.data;
-
-//     // } catch (e) {
-//     // 	logger.error('Failed to fetch strategy', e);
-
-//     // 	return null;
-//     // }
-// };
