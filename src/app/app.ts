@@ -1,5 +1,5 @@
 import { SlashCreator, GatewayServer, SlashCommand, CommandContext } from 'slash-create';
-import Discord, { Client, ClientOptions, Intents, WSEventType } from 'discord.js';
+import Discord, { Client, ClientOptions, GatewayIntentBits, Partials, GatewayDispatchEvents } from 'discord.js';
 import path from 'path';
 import fs from 'fs';
 import { createLogger } from './utils/logger';
@@ -42,7 +42,7 @@ initializeSlashCreateEvents();
 // Register command handlers
 creator
 	.withServer(
-		new GatewayServer((handler) => client.ws.on(<WSEventType>'INTERACTION_CREATE', handler)),
+		new GatewayServer((handler) => client.ws.on(GatewayDispatchEvents.InteractionCreate, handler)),
 	)
 	.registerCommandsIn(path.join(__dirname, 'commands'))
 	.syncCommands();
@@ -56,18 +56,16 @@ client.login(process.env.DISCORD_BOT_TOKEN);
 function initializeClient(): Client {
 	const clientOptions: ClientOptions = {
 		intents: [
-			Intents.FLAGS.GUILDS,
-			Intents.FLAGS.GUILD_BANS,
-			Intents.FLAGS.GUILD_MEMBERS,
-			Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS,
-			Intents.FLAGS.GUILD_VOICE_STATES,
-			Intents.FLAGS.GUILD_PRESENCES,
-			Intents.FLAGS.GUILD_MESSAGES,
-			Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-			Intents.FLAGS.DIRECT_MESSAGES,
-			Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
+			GatewayIntentBits.Guilds,
+			GatewayIntentBits.GuildMembers,
+			GatewayIntentBits.GuildMessages,
+			GatewayIntentBits.GuildPresences,
 		],
-		partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'USER'],
+		partials: [
+			Partials.Message,
+			Partials.Channel,
+			Partials.User
+		],
 	};
 	return new Discord.Client(clientOptions);
 }

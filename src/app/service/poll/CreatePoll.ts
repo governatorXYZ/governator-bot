@@ -1,11 +1,21 @@
-import Discord, { MessageActionRow, MessageButton, MessageEmbed, TextChannel } from 'discord.js';
+import Discord, { 
+	Client,
+	ActionRowBuilder,
+	ButtonBuilder,
+	EmbedBuilder,
+	TextChannel,
+	ButtonStyle,
+	User
+} from 'discord.js';
 import { createLogger } from '../../utils/logger';
 import axios, { AxiosResponse } from 'axios';
 import moment from 'moment';
+import { fetchGovernatorUser } from '../vote/Vote'
+import Api from '../../utils/api'
 
 const logger = createLogger('CreatePoll');
 
-export default async (event, client): Promise<void> => {
+export default async (event, client: Client): Promise<void> => {
 	const emojiInfo = {};
 
 	const poll = JSON.parse(event.data);
@@ -40,7 +50,7 @@ export default async (event, client): Promise<void> => {
 
 	logger.data('usedEmojis', usedEmojis);
 
-	const row = new MessageActionRow();
+	const row = new ActionRowBuilder<ButtonBuilder>();
 
 	const dest = await client.channels.fetch(clientConfig.channel_id).catch((e) => {
 		logger.error(e);
@@ -49,14 +59,37 @@ export default async (event, client): Promise<void> => {
 
 	if (!dest) return;
 
-	const msgEmbed = await pollEmbed(poll, poll_options, EmojiList, poll._id);
+	const govUser = await fetchGovernatorUser(poll.author_user_id).catch((e) =>{
+		logger.error('failed to fetch governator user')
+		return null;
+	});
+
+	logger.data(govUser)
+
+	const authorDiscordUserId = govUser ? 
+		(govUser.provider_accounts.find(account => account.provider_id === 'discord' ))._id :
+		null;
+
+	logger.data(authorDiscordUserId)
+
+	const author = authorDiscordUserId ? 
+		await client.users.fetch(authorDiscordUserId).catch((e) => {
+			logger.error(e);
+			return null;
+		}) as User :
+		null;
+
+	logger.data(author.username)
+
+
+	const msgEmbed = await pollEmbed(author, poll, poll_options, EmojiList, poll._id);
 
 	polls.forEach((option: any, index: number) => {
 		row.addComponents(
-			new MessageButton()
+			new ButtonBuilder()
 				.setCustomId(`${poll._id}:${option}`)
 				.setLabel(`${EmojiList[index]}`)
-				.setStyle('PRIMARY'),
+				.setStyle(ButtonStyle.Secondary),
 		);
 	});
 
@@ -75,7 +108,7 @@ export default async (event, client): Promise<void> => {
 };
 
 const updatePoll = async (poll, messageId) => {
-	const pollPatchEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/poll/update/${poll._id}`;
+	const pollPatchEndpoint = `${Api.getBasePath()}/poll/update/${poll._id}`;
 
 	poll.client_config.forEach((conf) => {
 		if (conf.provider_id === 'discord') {
@@ -102,45 +135,61 @@ const updatePoll = async (poll, messageId) => {
 };
 
 
-async function pollEmbed(poll, poll_options, EmojiList, id): Promise<MessageEmbed> {
+const pollEmbed = async (user: User, poll, poll_options, EmojiList, id): Promise<EmbedBuilder> => {
 
 	const strategy = await fetchStrategy(poll.strategy_config[0].strategy_id);
 
 	const ts = moment(poll.end_time).utc().format('X');
 
 	// TODO: add author to the embed (required endpoint to look up client ID based on goverator user ID from poll)
-	const msgEmbed = new Discord.MessageEmbed().setTitle(`${poll.title} \nends <t:${ts}:R>`)
+	const msgEmbed = new Discord.EmbedBuilder().setTitle(`${poll.title}`)
 		.setDescription(poll.description)
+		.setAuthor(user ? { name: user.username, iconURL: user.avatarURL() } : {name: '', iconURL: ''})
 		.setFooter({ text: id })
 		.setThumbnail(process.env.GOVERNATOR_LOGO_URL.toString())
-		.addField('\u200B', '\u200B', false);
+		.addFields([
+			{ name: '\u200B', value: '\u200B', inline: false },
+		]);
 
 	logger.info(`poll end time: ${poll.end_time}, timestamp: ${ts}`);
 
 	poll_options.forEach((option: any, index: number) =>{
-		msgEmbed.addField(`${EmojiList[index]} : ${option.poll_option_name}`, '\u200B', false);
+		msgEmbed.addFields([{ name: `${EmojiList[index]} ${option.poll_option_name}`, value: '\u200B', inline: false }]);
+		// if (index === poll_options.length - 1) {
+		// 	msgEmbed.addFields([{ name: '\u200B', value: spacer(10), inline: false }]);
+		// }
 	});
 
 	poll.client_config.find(config => config.provider_id === 'discord').role_restrictions.forEach((role, index) => {
 		if (index === 0) {
-			msgEmbed.addField('\u200B', '🚫 Role restrictions 🚫', false);
+			msgEmbed.addFields([{ name: '\u200B', value: '🚫 **Role restrictions**', inline: false }]);
 		}
-		msgEmbed.addField('\u200B', `<@&${role}>`, false);
+		msgEmbed.addFields([{ name: '\u200B', value: `<@&${role}>`, inline: false}]);
 
 		if (index === (poll.client_config.find(config => config.provider_id === 'discord').role_restrictions.length - 1)) {
-			msgEmbed.addField('\u200B', '\u200B', false);
+			msgEmbed.addFields([{ name: '\u200B', value: '\u200B', inline: false }]);
 		}
 	});
 
-	msgEmbed.addField('Strategy', ('`' + `${strategy.name}` + '`'), true)
-		.addField('# votes', '```' + '0000' + '```', true);
+	msgEmbed.addFields([
+		{ name: '♜ Strategy', value: ('```' + strategy.name + '```'), inline: true},
+		{ name: '🗳️ Votes', value: '```' + '0000' + '```', inline: true},
+		{ name: `📅 Ends <t:${ts}:R>`, value: '\u200B', inline: false},
+	]);
 
 	return msgEmbed;
+}
 
+const spacer = (len: Number) => {
+	let st = '';
+	for (let i = 0; i < len; i++) {
+		st += '.o0o.';
+	}
+	return st;
 }
 
 const fetchStrategy = async (strategyId) => {
-	const strategyGetEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/strategies/find/one/${strategyId}`;
+	const strategyGetEndpoint = `${Api.getBasePath()}/strategies/find/one/${strategyId}`;
 
 	try {
 		const strategy: AxiosResponse = await axios.get(strategyGetEndpoint);

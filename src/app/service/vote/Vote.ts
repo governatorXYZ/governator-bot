@@ -4,6 +4,7 @@ import { createLogger } from '../../utils/logger';
 import client from '../../app';
 import { ethers } from 'ethers';
 import { strategyTypes } from '../../constants/constants';
+import Api from '../../utils/api'
 
 const logger = createLogger('Vote');
 
@@ -15,11 +16,14 @@ export default async (componentContext:ComponentContext): Promise<any> => {
 
 	// fetch poll from db
 	const poll = await fetchPoll(pollId);
+	const clientConfig = poll.client_config.find((obj) => {
+		return obj.provider_id === 'discord';
+	});
 
 	if (!poll) return;
 
-	if (poll.role_restrictions && poll.role_restrictions.length > 0) {
-		if (await roleRestricted(componentContext, poll.role_restrictions)) {
+	if (clientConfig.role_restrictions && clientConfig.role_restrictions.length > 0) {
+		if (await roleRestricted(componentContext, clientConfig.role_restrictions)) {
 			await componentContext.send({ content: 'You do not have the required role to vote on this poll' });
 			return;
 		}
@@ -56,7 +60,10 @@ export default async (componentContext:ComponentContext): Promise<any> => {
 
 	// if token weighted poll, verify if account has wallet linked
 	if (await noEthAccountLinked(componentContext) && (poll.strategy_config[0].strategy_type === strategyTypes.STRATEGY_TYPE_TOKEN_WEIGHTED)) {
-		await componentContext.send({ content: 'No verified ethereum accounts found. Please link & verify your wallet to enable token voting: <https://www.governator.xyz>' });
+		await componentContext.send({ 
+			content: 'No verified ethereum accounts found. To enable token voting, please ' + 
+			'connect & verify your wallet on [governator.xyz](https://www.governator.xyz/account)' 
+		});
 		return;
 	}
 
@@ -68,7 +75,10 @@ export default async (componentContext:ComponentContext): Promise<any> => {
 
 	const votes = await createVote(poll._id, voteParams);
 
-	if (votes.length === 0) return;
+	if (votes.length === 0) {
+		await componentContext.send({ content: 'No tokens found with your account(s).' });
+		return;
+	};
 
 	await updateEmbedCount(poll._id, componentContext);
 
@@ -76,31 +86,62 @@ export default async (componentContext:ComponentContext): Promise<any> => {
 };
 
 const formatMessage = (votes, poll) => {
-	let st = 'Your vote: \n';
+	let st = '';
 	let pollOption: any;
 	for (const vote of votes) {
-		let voteData: any;
-		if (vote.method === 'update') {
-			voteData = vote.data.updatedVote;
-		} else {
-			voteData = vote.data;
+
+		let voteData = vote.data;
+		let methodSt: string;
+		switch (vote.method) {
+			case 'create':
+				methodSt = 'secretly cast'
+				break;
+			case 'update':
+				methodSt = 'updated'
+				voteData = vote.data.updatedVote;
+				break;
+			case 'delete':
+				methodSt = 'removed'
+				break;
 		}
+
+		st = `Your vote has been ${methodSt}; results will be calculated and revealed when the poll ends. \n\n`;
 
 		pollOption = poll.poll_options.find(option => option.poll_option_id === voteData.poll_option_id);
 
 		st +=
-			'`' + 'option:' + '`' + ` ${pollOption.poll_option_emoji} : ${pollOption.poll_option_name} - `
-			+ '`' + 'account:' + '`' + ` ${voteData.account_id} (${voteData.provider_id}) - `
-			+ '`' + 'vote weight:' + '`' + ` ${poll.strategy_config[0].strategy_type === strategyTypes.STRATEGY_TYPE_TOKEN_WEIGHTED ? Math.round(Number(ethers.utils.formatEther(voteData.vote_power))) : voteData.vote_power } - `
-			+ '`' + 'method:' + '`' + ` ${vote.method} vote\n`;
+			'`' + 'Option:' + '`' + ` ${ pollOption.poll_option_emoji } : ${ pollOption.poll_option_name }\n`
+			+ '`' + 'Voting Weight:' + '`' + ` ${ formatVotePower(poll, voteData.vote_power) }\n`
+			// + '`' + 'Account:' + '`' + ` ${ voteData.account_id } (${ voteData.provider_id })`
 
 	}
 	return st.substring(0, 2000);
 };
 
+const formatVotePower = (poll, votePower) => {
+	if (poll.strategy_config[0].strategy_type === strategyTypes.STRATEGY_TYPE_TOKEN_WEIGHTED) {
+
+		if (ethers.BigNumber.from(votePower).gt(ethers.BigNumber.from('10000'))) {
+			console.log(votePower)
+
+			return truncate(ethers.utils.formatEther(ethers.BigNumber.from(votePower)), 2);
+		} 
+	}
+
+	return votePower
+}
+
+function truncate(str, maxDecimalDigits) {
+    if (str.includes('.')) {
+        const parts = str.split('.');
+        return parts[0] + '.' + parts[1].slice(0, maxDecimalDigits);
+    }
+    return str;
+}
+
 const noEthAccountLinked = async (componentContext) => {
 	// get all accounts from user object
-	const user = await fetchUser(componentContext.user.id).catch((e) => {
+	const user = await fetchDiscordUser(componentContext.user.id).catch((e) => {
 		logger.error(e);
 		return null;
 	});
@@ -158,7 +199,7 @@ const updateEmbedCount = async (pollId, componentContext) => {
 
 	const embed = componentContext.message.embeds[0];
 
-	embed.fields[componentContext.message.embeds[0].fields.length - 1].value = '```' + `${pad(count, 4)}` + '```';
+	embed.fields[componentContext.message.embeds[0].fields.length - 2].value = '```' + `${pad(count, 4)}` + '```';
 
 	const msg = componentContext.message;
 
@@ -168,8 +209,8 @@ const updateEmbedCount = async (pollId, componentContext) => {
 };
 
 // FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
-const createVote = async (poll_id, voteParams) => {
-	const voteRequestEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/vote/${poll_id}`;
+const createVote = async (pollId, voteParams) => {
+	const voteRequestEndpoint = `${Api.getBasePath()}/vote/${pollId}`;
 
 	logger.debug({
 		poll_option_id: voteParams.poll_option_id,
@@ -197,8 +238,8 @@ const createVote = async (poll_id, voteParams) => {
 };
 
 // FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
-export const fetchPoll = async (poll_id) => {
-	const getPollByIdEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/poll/${poll_id}`;
+export const fetchPoll = async (pollId) => {
+	const getPollByIdEndpoint = `${Api.getBasePath()}/poll/${pollId}`;
 
 	try {
 		const poll: AxiosResponse = await axios.get(getPollByIdEndpoint);
@@ -217,7 +258,7 @@ export const fetchPoll = async (poll_id) => {
 
 // FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
 const fetchAccount = async (clientAccountId) => {
-	const accountGetEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/account/discord/get-by-account-id/${clientAccountId}`;
+	const accountGetEndpoint = `${Api.getBasePath()}/account/discord/get-by-account-id/${clientAccountId}`;
 
 	try {
 		const account: AxiosResponse = await axios.get(accountGetEndpoint);
@@ -235,8 +276,27 @@ const fetchAccount = async (clientAccountId) => {
 };
 
 // FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
-const fetchUser = async (clientAccountId) => {
-	const userGetEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/user/discord/${clientAccountId}`;
+const fetchDiscordUser = async (clientAccountId) => {
+	const userGetEndpoint = `${Api.getBasePath()}/user/discord/${clientAccountId}`;
+
+	try {
+		const user: AxiosResponse = await axios.get(userGetEndpoint);
+
+		logger.info('Fetched user');
+		logger.data('Fetched user', user.data);
+
+		return user.data;
+
+	} catch (e) {
+		logger.error('Failed to fetch user', e);
+
+		return null;
+	}
+};
+
+// FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
+export const fetchGovernatorUser = async (governatorUserId) => {
+	const userGetEndpoint = `${Api.getBasePath()}/user/${governatorUserId}`;
 
 	try {
 		const user: AxiosResponse = await axios.get(userGetEndpoint);
@@ -255,7 +315,7 @@ const fetchUser = async (clientAccountId) => {
 
 // FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
 const createAccount = async (id, username) => {
-	const accountCreateEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/account/discord/create`;
+	const accountCreateEndpoint = `${Api.getBasePath()}/account/discord/create`;
 
 	try {
 		const account: AxiosResponse = await axios.post(accountCreateEndpoint, {
@@ -277,7 +337,7 @@ const createAccount = async (id, username) => {
 
 // FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
 export const fetchResultSum = async (pollId) => {
-	const resultsSumGetEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/vote/results/sum/${pollId}`;
+	const resultsSumGetEndpoint = `${Api.getBasePath()}/vote/results/sum/${pollId}`;
 
 	try {
 		const results: AxiosResponse = await axios.get(resultsSumGetEndpoint);
@@ -296,7 +356,7 @@ export const fetchResultSum = async (pollId) => {
 
 // FIXME we will change this to openapi client in the future so we won't have to specify endpoints manually
 export const fetchResultPerUserCount = async (pollId) => {
-	const resultsSumGetEndpoint = `${process.env.GOVERNATOR_API_BASE_PATH}/${process.env.GOVERNATOR_API_PREFIX}/vote/results/votes-per-user/count/${pollId}`;
+	const resultsSumGetEndpoint = `${Api.getBasePath()}/vote/results/votes-per-user/count/${pollId}`;
 
 	try {
 		const results: AxiosResponse = await axios.get(resultsSumGetEndpoint);
