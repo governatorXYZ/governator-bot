@@ -48,11 +48,13 @@
         "dotenv": "^14.2.0",
         "ethers": "^5.7.2",
         "eventsource": "^2.0.2",
+        "governator-api": "^1.0.1",
         "moment": "^2.29.4",
         "slash-create": "^5.11.0",
         "winston": "^3.7.2"
     },
     "devDependencies": {
+        "@types/eventsource": "^1.1.10",
         "@types/jest": "^27.4.0",
         "@typescript-eslint/eslint-plugin": "^5.10.0",
         "@typescript-eslint/parser": "^5.10.0",
