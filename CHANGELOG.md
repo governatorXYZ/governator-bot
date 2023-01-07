@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0
+
+1. use api-client
+2. update TypeScript to strict mode
+
 ## 0.4.0
 
 1. update to discord.js14 & other dependencies
@@ -13,7 +18,7 @@
    1. Updated Poll schema
    2. Update poll with message ID after POLL_CREATE
    3. Respond to POLL_COMPLETE event
-   4. use new vote api (remove need for running strategy by client)
+   4. use new vote api (remove need for running strategy by client)q
    5. use new results api
 2. Fix REQUEST_CLIENT_DATA event handlers
 3. Add role gating
