@@ -2,6 +2,7 @@ import {
     ClientConfigBase,
     DiscordAccountResponseDto,
     EthereumAccountResponseDto,
+    CommunityClientConfigBase,
 } from 'governator-api';
 
 export type Account = DiscordAccountResponseDto | EthereumAccountResponseDto;
@@ -28,4 +29,14 @@ export interface VoteByPollAggregate {
     votes: {
         _id: string;
     }[];
+}
+
+export interface CommunityClientConfigDiscordDto extends CommunityClientConfigBase {
+    guild_id: string;
+    channel_allowlist: string[];
+    channel_denylist: string[];
+    role_allowlist: string[];
+    role_denylist: string[];
+    user_allowlist: string[];
+    user_denylist: string[];
 }

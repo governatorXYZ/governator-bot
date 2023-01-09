@@ -8,11 +8,13 @@ import {
     ThreadChannel,
     ChannelType,
     Client,
+    PermissionFlagsBits,
 } from 'discord.js';
 import { createLogger } from '../../utils/logger';
 import Api from '../../utils/api';
-import { DiscordResponseDto } from 'governator-api';
+import { DiscordResponseDto, CommunityResponseDto } from 'governator-api';
 import { DiscordRequestDto } from '../../types/governator-events/GovernatorEventTypes';
+import { CommunityClientConfigDiscordDto } from '../../types/governator-api/GovernatorApiTypes';
 
 const logger = createLogger('ClientDataRequest');
 
@@ -37,6 +39,9 @@ export default async (dataRequest: DiscordRequestDto, client: Client): Promise<v
 
     const filteredChannels: Collection<any, any> = new Collection();
 
+    let communityConfig: CommunityResponseDto;
+    let discordConfig: CommunityClientConfigDiscordDto;
+
     const responseData: DiscordResponseDto = {
         uuid: dataRequest.uuid,
         provider_id: dataRequest.provider_id,
@@ -56,13 +61,24 @@ export default async (dataRequest: DiscordRequestDto, client: Client): Promise<v
             return;
         }
 
+        communityConfig = await Api.community.getByGuildId(dataRequest.guildId);
+        discordConfig = communityConfig.client_config.find((config) => config.provider_id === 'discord') as CommunityClientConfigDiscordDto;
+
         if (guildChannels) {
             guildChannels.forEach((channel, key) => {
+                
                 if (channel.type === ChannelType.GuildText && (![ChannelType.PublicThread, ChannelType.PrivateThread].includes(channel.type))) {
+
+                    if (Array.isArray(discordConfig.channel_allowlist) && discordConfig.channel_allowlist.length && !discordConfig.channel_allowlist.includes(channel.id)) return;
+
+                    if (Array.isArray(discordConfig.channel_denylist) && discordConfig.channel_denylist.length && discordConfig.channel_denylist.includes(channel.id)) return;
+
                     const member = (channel as TextChannel).members.get(dataRequest.userId);
 
                     if (member) {
-                        return filteredChannels.set(key, guildChannels.get(key));
+                        if ((channel as TextChannel).permissionsFor(member).has([PermissionFlagsBits.SendMessages, PermissionFlagsBits.ViewChannel])) {
+                            return filteredChannels.set(key, guildChannels.get(key));
+                        }
                     }
                 }
             });

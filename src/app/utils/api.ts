@@ -11,6 +11,7 @@ import {
     VoteRequestDto,
     RequestDataFromClientApi,
     DiscordResponseDto,
+    CommunityApi,
 } from 'governator-api';
 import { Strategy, VoteByPollAggregate } from '../types/governator-api/GovernatorApiTypes';
 
@@ -83,6 +84,12 @@ const ApiUtils = {
     dataRequest: {
         async respondToDataRequest(dataResponse: DiscordResponseDto) {
             return (await new RequestDataFromClientApi(configuration).clientRequestControllerSendResponse(dataResponse)).data;
+        },
+    },
+
+    community: {
+        async getByGuildId(guildId: string) {
+            return (await new CommunityApi(configuration).communityControllerFetchCommunityByDiscordGuildId(guildId)).data;
         },
     },
 };
