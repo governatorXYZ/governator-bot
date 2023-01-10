@@ -62,7 +62,10 @@ export default async (dataRequest: DiscordRequestDto, client: Client): Promise<v
         }
 
         communityConfig = await Api.community.getByGuildId(dataRequest.guildId);
-        discordConfig = communityConfig.client_config.find((config) => config.provider_id === 'discord') as CommunityClientConfigDiscordDto;
+
+        if (communityConfig) {
+            discordConfig = communityConfig.client_config.find((config) => config.provider_id === 'discord') as CommunityClientConfigDiscordDto;
+        }
 
         if (guildChannels) {
             guildChannels.forEach((channel, key) => {
