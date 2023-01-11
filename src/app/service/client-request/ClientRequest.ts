@@ -28,7 +28,7 @@ export default async (dataRequest: DiscordRequestDto, client: Client): Promise<v
         guild = await client.guilds.fetch(dataRequest.guildId);
 
     } catch (e) {
-        logger.info('failed to fetch guild ', e);
+        logger.error('failed to fetch guild ', e);
 
         return;
     }
@@ -62,16 +62,19 @@ export default async (dataRequest: DiscordRequestDto, client: Client): Promise<v
         }
 
         communityConfig = await Api.community.getByGuildId(dataRequest.guildId);
-        discordConfig = communityConfig.client_config.find((config) => config.provider_id === 'discord') as CommunityClientConfigDiscordDto;
+
+        if (communityConfig) {
+            discordConfig = communityConfig.client_config.find((config) => config.provider_id === 'discord') as CommunityClientConfigDiscordDto;
+        }
 
         if (guildChannels) {
             guildChannels.forEach((channel, key) => {
                 
                 if (channel.type === ChannelType.GuildText && (![ChannelType.PublicThread, ChannelType.PrivateThread].includes(channel.type))) {
 
-                    if (Array.isArray(discordConfig.channel_allowlist) && discordConfig.channel_allowlist.length && !discordConfig.channel_allowlist.includes(channel.id)) return;
+                    if (discordConfig && Array.isArray(discordConfig.channel_allowlist) && discordConfig.channel_allowlist.length && !discordConfig.channel_allowlist.includes(channel.id)) return;
 
-                    if (Array.isArray(discordConfig.channel_denylist) && discordConfig.channel_denylist.length && discordConfig.channel_denylist.includes(channel.id)) return;
+                    if (discordConfig && Array.isArray(discordConfig.channel_denylist) && discordConfig.channel_denylist.length && discordConfig.channel_denylist.includes(channel.id)) return;
 
                     const member = (channel as TextChannel).members.get(dataRequest.userId);
 
