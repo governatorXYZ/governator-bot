@@ -10,7 +10,7 @@ export default (): MessageOptions => {
             fields: [
                 {
                     name: '-> Useful Links',
-                    value: '[BanklessDAO Product Support Center invite](https://discord.gg/85Kb6Qv6gd)\n',
+                    value: '[Governator Notion Page](https://governator.notion.site/Governator-Support-Center-2ebc542d891a4fbba9c014cef66a6d64)\n',
                     inline: false,
                 },
             ],
