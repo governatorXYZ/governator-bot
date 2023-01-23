@@ -10,7 +10,9 @@
         "esModuleInterop": true,
         "noEmitOnError": true,
         "moduleResolution": "node",
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+        "noFallthroughCasesInSwitch": true,
+        "strict": true
     },
     "include": ["src/**/*.ts"],
     "exclude": ["node_modules"]
