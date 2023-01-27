@@ -27,6 +27,8 @@ export default async (dataRequest: DiscordRequestDto, client: Client): Promise<v
     try {
         guild = await client.guilds.fetch(dataRequest.guildId);
 
+        logger.debug('fetched guild');
+
     } catch (e) {
         logger.error('failed to fetch guild ', e);
 
@@ -53,8 +55,10 @@ export default async (dataRequest: DiscordRequestDto, client: Client): Promise<v
     switch (dataRequest.method) {
     case 'channels':
         try {
-            
+
             guildChannels = guild.channels.cache;
+
+            logger.debug(guildChannels);
 
         } catch (e) {
             logger.info('failed to fetch channels ', e);
@@ -79,8 +83,11 @@ export default async (dataRequest: DiscordRequestDto, client: Client): Promise<v
 
                     const member = (channel as TextChannel).members.get(dataRequest.userId);
 
+                    logger.debug('found member');
+
                     if (member) {
                         if ((channel as TextChannel).permissionsFor(member).has([PermissionFlagsBits.SendMessages, PermissionFlagsBits.ViewChannel])) {
+                            logger.debug('setting levels');
                             return filteredChannels.set(key, guildChannels.get(key));
                         }
                     }
