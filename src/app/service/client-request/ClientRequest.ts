@@ -81,16 +81,17 @@ export default async (dataRequest: DiscordRequestDto, client: Client): Promise<v
 
                     if (discordConfig && Array.isArray(discordConfig.channel_denylist) && discordConfig.channel_denylist.length && discordConfig.channel_denylist.includes(channel.id)) return;
 
-                    const member = (channel as TextChannel).members.get(dataRequest.userId);
+                    return filteredChannels.set(key, guildChannels.get(key));
+                    // const member = (channel as TextChannel).members.get(dataRequest.userId);
 
-                    logger.debug('found member');
+                    // logger.debug('found member');
 
-                    if (member) {
-                        if ((channel as TextChannel).permissionsFor(member).has([PermissionFlagsBits.SendMessages, PermissionFlagsBits.ViewChannel])) {
-                            logger.debug('setting levels');
-                            return filteredChannels.set(key, guildChannels.get(key));
-                        }
-                    }
+                    // if (member) {
+                    //     if ((channel as TextChannel).permissionsFor(member).has([PermissionFlagsBits.SendMessages, PermissionFlagsBits.ViewChannel])) {
+                    //         logger.debug('setting levels');
+                    //         return filteredChannels.set(key, guildChannels.get(key));
+                    //     }
+                    // }
                 }
             });
         }
