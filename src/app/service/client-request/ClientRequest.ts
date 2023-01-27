@@ -53,9 +53,7 @@ export default async (dataRequest: DiscordRequestDto, client: Client): Promise<v
     switch (dataRequest.method) {
     case 'channels':
         try {
-
-            await guild.channels.fetch();
-
+            
             guildChannels = guild.channels.cache;
 
         } catch (e) {
