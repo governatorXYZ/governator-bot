@@ -53,7 +53,10 @@ export default async (dataRequest: DiscordRequestDto, client: Client): Promise<v
     switch (dataRequest.method) {
     case 'channels':
         try {
-            guildChannels = await guild.channels.cache;
+
+            await guild.channels.fetch();
+
+            guildChannels = guild.channels.cache;
 
         } catch (e) {
             logger.info('failed to fetch channels ', e);
@@ -97,7 +100,10 @@ export default async (dataRequest: DiscordRequestDto, client: Client): Promise<v
 
     case 'roles':
         try {
-            guildRoles = await guild.roles.cache;
+
+            await guild.roles.fetch();
+
+            guildRoles = guild.roles.cache;
 
         } catch (e) {
             logger.info('failed to fetch roles ', e);
