@@ -4,11 +4,11 @@ import {
     GuildChannel,
     Role,
     Snowflake,
-    TextChannel,
+    // TextChannel,
     ThreadChannel,
     ChannelType,
     Client,
-    PermissionFlagsBits,
+    // PermissionFlagsBits,
 } from 'discord.js';
 import { createLogger } from '../../utils/logger';
 import Api from '../../utils/api';
