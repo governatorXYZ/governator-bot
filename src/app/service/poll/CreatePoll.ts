@@ -169,7 +169,7 @@ const pollEmbed = async (pollEmbedParams: PollEmbedParams): Promise<EmbedBuilder
     logger.info(`poll end time: ${pollEmbedParams.poll.end_time}, timestamp: ${ts}`);
 
     (pollEmbedParams.poll.poll_options as PollOptionDto[]).forEach((option: any, index: number) => {
-        msgEmbed.addFields([{ name: `${pollEmbedParams.emojiList[index]} ${option.poll_option_name}`, value: '\u200B', inline: false }]);
+        msgEmbed.addFields([{ name: `${pollEmbedParams.emojiList[index]}  ${option.poll_option_name}`, value: '\u200B', inline: false }]);
     });
 
     const clientConfig = pollEmbedParams.poll.client_config.find(config => config.provider_id === 'discord') as ClientConfigDiscordDto;

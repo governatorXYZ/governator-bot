@@ -53,14 +53,14 @@ export default async (eventData: PollCompleteEventData, client: Client): Promise
             return {
                 poll_option_id: pollOption.poll_option_id,
                 percent: '0',
-                poll_option_value: `${pollOption.poll_option_emoji} ${pollOption.poll_option_name.trim()}`,
+                poll_option_value: `${pollOption.poll_option_emoji}  ${pollOption.poll_option_name.trim()}`,
             };
         } else {
             if (Number(optionResult.percent) > winner) winner = Number(optionResult.percent);
             return {
                 poll_option_id: pollOption.poll_option_id,
                 percent: optionResult.percent,
-                poll_option_value: `${pollOption.poll_option_emoji} ${pollOption.poll_option_name.trim()}`,
+                poll_option_value: `${pollOption.poll_option_emoji}  ${pollOption.poll_option_name.trim()}`,
             };
         }
     });
