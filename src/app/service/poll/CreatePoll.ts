@@ -124,7 +124,6 @@ export default async (poll: PollResponseDto, client: Client): Promise<void> => {
 };
 
 const updatePoll = async (poll: PollResponseDto, messageId: string): Promise<void> => {
-    // const pollPatchEndpoint = `${Api.getBasePath()}/poll/update/${poll._id}`;
 
     poll.client_config.forEach((conf) => {
         if (conf.provider_id === 'discord') {
