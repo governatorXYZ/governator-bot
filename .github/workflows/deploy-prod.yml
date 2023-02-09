@@ -26,10 +26,8 @@ jobs:
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: 'govbot-prod'
-          healthcheck: "https://govbot-prod.herokuapp.com/health"
-          delay: 5
           heroku_email: ${{secrets.HEROKU_EMAIL}}
-          procfile: 'worker: yarn start'
+          branch: main
         env:
           HD_DISCORD_BOT_ACTIVITY: ${{vars.DISCORD_BOT_ACTIVITY}}
           HD_DISCORD_BOT_APPLICATION_ID: ${{secrets.PROD_DISCORD_BOT_APPLICATION_ID}}
