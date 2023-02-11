@@ -4,11 +4,11 @@ import {
     GuildChannel,
     Role,
     Snowflake,
-    TextChannel,
+    // TextChannel,
     ThreadChannel,
     ChannelType,
     Client,
-    PermissionFlagsBits,
+    // PermissionFlagsBits,
 } from 'discord.js';
 import { createLogger } from '../../utils/logger';
 import Api from '../../utils/api';
@@ -26,6 +26,8 @@ export default async (dataRequest: DiscordRequestDto, client: Client): Promise<v
 
     try {
         guild = await client.guilds.fetch(dataRequest.guildId);
+
+        logger.debug('fetched guild');
 
     } catch (e) {
         logger.error('failed to fetch guild ', e);
@@ -53,7 +55,10 @@ export default async (dataRequest: DiscordRequestDto, client: Client): Promise<v
     switch (dataRequest.method) {
     case 'channels':
         try {
-            guildChannels = await guild.channels.cache;
+
+            guildChannels = guild.channels.cache;
+
+            logger.debug(guildChannels);
 
         } catch (e) {
             logger.info('failed to fetch channels ', e);
@@ -76,13 +81,17 @@ export default async (dataRequest: DiscordRequestDto, client: Client): Promise<v
 
                     if (discordConfig && Array.isArray(discordConfig.channel_denylist) && discordConfig.channel_denylist.length && discordConfig.channel_denylist.includes(channel.id)) return;
 
-                    const member = (channel as TextChannel).members.get(dataRequest.userId);
+                    return filteredChannels.set(key, guildChannels.get(key));
+                    // const member = (channel as TextChannel).members.get(dataRequest.userId);
 
-                    if (member) {
-                        if ((channel as TextChannel).permissionsFor(member).has([PermissionFlagsBits.SendMessages, PermissionFlagsBits.ViewChannel])) {
-                            return filteredChannels.set(key, guildChannels.get(key));
-                        }
-                    }
+                    // logger.debug('found member');
+
+                    // if (member) {
+                    //     if ((channel as TextChannel).permissionsFor(member).has([PermissionFlagsBits.SendMessages, PermissionFlagsBits.ViewChannel])) {
+                    //         logger.debug('setting levels');
+                    //         return filteredChannels.set(key, guildChannels.get(key));
+                    //     }
+                    // }
                 }
             });
         }
@@ -97,7 +106,10 @@ export default async (dataRequest: DiscordRequestDto, client: Client): Promise<v
 
     case 'roles':
         try {
-            guildRoles = await guild.roles.cache;
+
+            await guild.roles.fetch();
+
+            guildRoles = guild.roles.cache;
 
         } catch (e) {
             logger.info('failed to fetch roles ', e);
