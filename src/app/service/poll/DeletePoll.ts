@@ -1,7 +1,7 @@
 import { TextChannel, Message, Client } from 'discord.js';
 import { createLogger } from '../../utils/logger';
 import { ClientConfigDiscordDto } from '../../types/governator-api/GovernatorApiTypes';
-import { PollResponseDto } from 'governator-api';
+import { PollResponseDto } from 'governator-sdk';
 
 const logger = createLogger('DeletePoll');
 

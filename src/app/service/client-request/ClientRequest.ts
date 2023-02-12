@@ -12,7 +12,7 @@ import {
 } from 'discord.js';
 import { createLogger } from '../../utils/logger';
 import Api from '../../utils/api';
-import { DiscordResponseDto, CommunityResponseDto } from 'governator-api';
+import { DiscordResponseDto, CommunityResponseDto } from 'governator-sdk';
 import { DiscordRequestDto } from '../../types/governator-events/GovernatorEventTypes';
 import { CommunityClientConfigDiscordDto } from '../../types/governator-api/GovernatorApiTypes';
 

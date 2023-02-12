@@ -9,7 +9,7 @@ import { DiscordAccountCreateDto,
     VoteRequestDto,
     PollResponseDto,
     EthereumAccountResponseDto,
-} from 'governator-api';
+} from 'governator-sdk';
 import { ClientConfigDiscordDto, Account } from '../../types/governator-api/GovernatorApiTypes';
 
 const logger = createLogger('Vote');
