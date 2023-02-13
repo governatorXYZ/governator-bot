@@ -2268,10 +2268,10 @@ globby@^11.1.0:
     merge2 "^1.4.1"
     slash "^3.0.0"
 
-governator-sdk@^1.0.7:
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/governator-sdk/-/governator-sdk-1.0.7.tgz#de2b23b4ac86cef56bf415be0c3f0f7d43cd42d4"
-  integrity sha512-L8nvN4AxdKiAsKu8ERPZQdZFl+i9QGub9Yzb82vL8vx/kztg3RfI1EVsCQAJ2kmuD+B8AscOA7eDPZQKV64nzQ==
+governator-sdk@^1.0.8:
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/governator-sdk/-/governator-sdk-1.0.8.tgz#f31c2d47e6dc13b08dfca01a985c9c11cb00414e"
+  integrity sha512-djrk5gIzSkmO5Ny5uzgfpnoFE8y5I7GU4BDlXYnzWR+/pFOMcpFLVbgZoax5j/xtJ+Z7HnhZpWABJ3WmEca3aw==
   dependencies:
     axios "^0.26.1"
 
