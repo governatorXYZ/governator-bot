@@ -27,8 +27,7 @@ jobs:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: 'govbot-test'
           heroku_email: ${{secrets.HEROKU_EMAIL}}
-          branch: develop
-         env:
+        env:
           HD_DISCORD_BOT_ACTIVITY: ${{vars.DISCORD_BOT_ACTIVITY}}
           HD_DISCORD_BOT_APPLICATION_ID: ${{secrets.QA_DISCORD_BOT_APPLICATION_ID}}
           HD_DISCORD_BOT_PUBLIC_KEY: ${{secrets.QA_DISCORD_BOT_PUBLIC_KEY}}
@@ -36,7 +35,7 @@ jobs:
           HD_GOVERNATOR_API_BASE_PATH: ${{vars.QA_GOVERNATOR_API_BASE_PATH}}
           HD_GOVERNATOR_API_ENDPOINT_SSE: ${{vars.GOVERNATOR_API_ENDPOINT_SSE}}
           HD_GOVERNATOR_API_KEY: ${{secrets.QA_GOVERNATOR_API_KEY}}
-          HD_GOVERNATOR_API_PREFIX: ${{secrets.GOVERNATOR_API_GLOBAL_PREFIX}}
+          HD_GOVERNATOR_API_PREFIX: ${{vars.GOVERNATOR_API_GLOBAL_PREFIX}}
           HD_GOVERNATOR_LOGO_URL: ${{vars.GOVERNATOR_LOGO_URL}}
           HD_LOG_LEVEL: ${{vars.QA_LOG_LEVEL}}
           HD_YARN_PRODUCTION: ${{vars.QA_YARN_PRODUCTION}}

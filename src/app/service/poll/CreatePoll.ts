@@ -15,7 +15,7 @@ import {
     PollOptionDto,
     StrategyConfig,
     DiscordAccountResponseDto,
-} from 'governator-api';
+} from 'governator-sdk';
 import { ClientConfigDiscordDto } from '../../types/governator-api/GovernatorApiTypes';
 
 const logger = createLogger('CreatePoll');
