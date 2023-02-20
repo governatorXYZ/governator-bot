@@ -92,7 +92,7 @@ export default async (eventData: PollCompleteEventData, client: Client): Promise
         .setDescription(embed.description)
         .setAuthor(embed.author)
         .setFooter(embed.footer)
-        .setThumbnail(embed.thumbnail ? embed.thumbnail.url : '')
+        // .setThumbnail(embed.thumbnail ? embed.thumbnail.url : '')
         .addFields(embed.fields)
         .spliceFields(-1, 1, { name: `📅 Ended <t:${ts}:R>`, value: '\u200B', inline: false });
 
