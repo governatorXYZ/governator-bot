@@ -58,7 +58,7 @@ export default async (dataRequest: DiscordRequestDto, client: Client): Promise<v
 
             guildChannels = guild.channels.cache;
 
-            logger.debug(guildChannels);
+            // logger.debug(guildChannels);
 
         } catch (e) {
             logger.info('failed to fetch channels ', e);
@@ -98,7 +98,7 @@ export default async (dataRequest: DiscordRequestDto, client: Client): Promise<v
 
         responseData.data = mapIdToName(filteredChannels);
 
-        logger.data('responseData', responseData);
+        // logger.data('responseData', responseData);
 
         Api.dataRequest.respondToDataRequest(responseData);
 
