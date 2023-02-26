@@ -161,7 +161,7 @@ const pollEmbed = async (pollEmbedParams: PollEmbedParams): Promise<EmbedBuilder
             iconURL: (pollEmbedParams.author as Discord.User).avatarURL() as string,
         })
         .setFooter({ text: pollEmbedParams.poll._id as string })
-        .setThumbnail(process.env.GOVERNATOR_LOGO_URL?.toString() as string)
+        // .setThumbnail(process.env.GOVERNATOR_LOGO_URL?.toString() as string)
         .addFields([
             { name: '\u200B', value: '\u200B', inline: false },
         ]);

@@ -238,7 +238,7 @@ export const embedToEmbedBuilder = (embed: Embed): EmbedBuilder => {
             iconURL: embed.author?.iconURL,
         })
         .setFooter(embed.footer)
-        .setThumbnail(embed.thumbnail?.url ?? null)
+        // .setThumbnail(embed.thumbnail?.url ?? null)
         .addFields(embed.fields);
 };
 
