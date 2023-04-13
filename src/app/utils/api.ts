@@ -12,7 +12,7 @@ import {
     RequestDataFromClientApi,
     DiscordResponseDto,
     CommunityApi,
-} from 'governator-api';
+} from 'governator-sdk';
 import { Strategy, VoteByPollAggregate } from '../types/governator-api/GovernatorApiTypes';
 
 const configuration = new Configuration({
@@ -53,8 +53,7 @@ const ApiUtils = {
 
     strategy: {
         async fetchById(strategyId: string) {
-            // TODO: find out why it is named this way and fix it
-            return (await new StrategiesApi(configuration).daoPunksStrategyGet(strategyId)).data as Strategy;
+            return (await new StrategiesApi(configuration).strategyControllerGetOne(strategyId)).data as Strategy;
         },
     },
 

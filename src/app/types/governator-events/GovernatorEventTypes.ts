@@ -1,4 +1,11 @@
-import { PollResponseDto } from 'governator-api';
+import { PollResponseDto } from 'governator-sdk';
+
+export interface VoteCreateEvent extends MessageEvent {
+	data: {
+		poll_id: string,
+		vote_count:string,
+	};
+}
 
 export interface PollCompleteEvent extends MessageEvent {
 	data: PollCompleteEventData;

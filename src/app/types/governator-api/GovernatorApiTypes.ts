@@ -3,7 +3,7 @@ import {
     DiscordAccountResponseDto,
     EthereumAccountResponseDto,
     CommunityClientConfigBase,
-} from 'governator-api';
+} from 'governator-sdk';
 
 export type Account = DiscordAccountResponseDto | EthereumAccountResponseDto;
 

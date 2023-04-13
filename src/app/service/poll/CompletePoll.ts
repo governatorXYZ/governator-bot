@@ -1,4 +1,4 @@
-import { TextChannel, Message, Embed, EmbedBuilder } from 'discord.js';
+import { TextChannel, Message, Embed, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { createLogger } from '../../utils/logger';
 import moment from 'moment';
 import { Client } from 'discord.js';
@@ -53,14 +53,14 @@ export default async (eventData: PollCompleteEventData, client: Client): Promise
             return {
                 poll_option_id: pollOption.poll_option_id,
                 percent: '0',
-                poll_option_value: `${pollOption.poll_option_emoji} ${pollOption.poll_option_name}`,
+                poll_option_value: `${pollOption.poll_option_emoji}  ${pollOption.poll_option_name.trim()}`,
             };
         } else {
             if (Number(optionResult.percent) > winner) winner = Number(optionResult.percent);
             return {
                 poll_option_id: pollOption.poll_option_id,
                 percent: optionResult.percent,
-                poll_option_value: `${pollOption.poll_option_emoji} ${pollOption.poll_option_name}`,
+                poll_option_value: `${pollOption.poll_option_emoji}  ${pollOption.poll_option_name.trim()}`,
             };
         }
     });
@@ -74,11 +74,25 @@ export default async (eventData: PollCompleteEventData, client: Client): Promise
 
     const updateEmbed = new EmbedBuilder();
 
+    const generateProgressBar = (percentage: string) => {
+        let st = '';
+
+        for (let i = 0, n = Math.round((20 / 100) * Number(percentage)); i < n; i++) {
+            st += '█';
+        }
+
+        for (let i = 0, n = 20 - st.length; i < n; i++) {
+            st += ' ';
+        }
+
+        return '`' + st + '`';
+    };
+
     updateEmbed.setTitle(`${(results.aggregate.length > 0) ? '✅ ' : '❌'} ${poll.title}`)
         .setDescription(embed.description)
         .setAuthor(embed.author)
         .setFooter(embed.footer)
-        .setThumbnail(embed.thumbnail ? embed.thumbnail.url : '')
+        // .setThumbnail(embed.thumbnail ? embed.thumbnail.url : '')
         .addFields(embed.fields)
         .spliceFields(-1, 1, { name: `📅 Ended <t:${ts}:R>`, value: '\u200B', inline: false });
 
@@ -91,8 +105,8 @@ export default async (eventData: PollCompleteEventData, client: Client): Promise
                         index,
                         1,
                         {
-                            name: `${field.name} ${result.percent} % ${(Number(result.percent) === winner) && (winner > 0) ? '🎉' : ''}`,
-                            value: '\u200B',
+                            name: `${field.name}`,
+                            value: `${generateProgressBar(result.percent)} **| ${result.percent} %** ${(Number(result.percent) === winner) && (winner > 0) ? '🎉' : ''}`,
                             inline: false,
                         },
                     );
@@ -100,8 +114,17 @@ export default async (eventData: PollCompleteEventData, client: Client): Promise
             });
         });
 
+        const row = new ActionRowBuilder<ButtonBuilder>();
+
+        row.addComponents(
+            new ButtonBuilder()
+                .setURL(`https://governator.xyz/community/${(poll.client_config[0] as ClientConfigDiscordDto).guild_id}/polls/results/${poll._id}`)
+                .setLabel('Result')
+                .setStyle(ButtonStyle.Link),
+        );
+
         // TODO think about race condition
-        await pollMessage.edit({ embeds: [updateEmbed], components: [] });
+        await pollMessage.edit({ embeds: [updateEmbed], components: [row] });
     } else {
         logger.error('resultsMappedToEmojis not defined');
         await pollMessage.edit({ embeds: [updateEmbed], components: [] });

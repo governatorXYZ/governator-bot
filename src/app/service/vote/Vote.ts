@@ -9,8 +9,9 @@ import { DiscordAccountCreateDto,
     VoteRequestDto,
     PollResponseDto,
     EthereumAccountResponseDto,
-} from 'governator-api';
+} from 'governator-sdk';
 import { ClientConfigDiscordDto, Account } from '../../types/governator-api/GovernatorApiTypes';
+import { Embed, EmbedBuilder, Message } from 'discord.js';
 
 const logger = createLogger('Vote');
 
@@ -52,7 +53,6 @@ export default async (componentContext:ComponentContext): Promise<any> => {
     });
 
     // try to fetch account
-    // let account = await fetchAccount(componentContext.user.id);
     let account = await Api.account.fetchByDiscordUser(componentContext.user.id).catch((e: any) => {
         logger.error('failed to fetch account', e);
         return null;
@@ -111,8 +111,6 @@ export default async (componentContext:ComponentContext): Promise<any> => {
         await componentContext.send({ content: 'No tokens found with your account(s).' });
         return;
     }
-
-    await updateEmbedCount(poll._id, componentContext);
 
     await componentContext.send({ content: `${formatMessage(votes as VoteResponseDto[], poll)}` });
 };
@@ -218,29 +216,35 @@ const roleRestricted = async (componentContext: ComponentContext, roleRestrictio
     return restricted;
 };
 
-const updateEmbedCount = async (pollId: string, componentContext: ComponentContext) => {
+const pad = (num: string, size: number): string => {
+    const s = '0000000' + num;
+    return s.slice(s.length - size);
+};
 
-    const count = await Api.vote.fetchVoteUserCount(pollId).catch((e: any) => {
-        logger.error('failed to fetch poll', e);
-        return '0';
-    });
+export const updateCountField = (embed: EmbedBuilder, count: string) => {
 
-    logger.info(`Vote count: ${count}`);
+    if (!embed.data.fields) return;
 
-    const pad = (num: string, size: number): string => {
-        const s = '0000000' + num;
-        return s.slice(s.length - size);
-    };
+    embed.data.fields[embed.data.fields.length - 2].value = '```' + `${pad(count, 4)}` + '```';
 
-    const embed = componentContext.message.embeds[0];
+    return embed;
+};
 
-    if (!embed.fields) return;
+export const embedToEmbedBuilder = (embed: Embed): EmbedBuilder => {
+    return new EmbedBuilder().setTitle(embed.title)
+        .setDescription(embed.description)
+        .setAuthor({
+            name: embed.author?.name ?? '',
+            iconURL: embed.author?.iconURL,
+        })
+        .setFooter(embed.footer)
+        // .setThumbnail(embed.thumbnail?.url ?? null)
+        .addFields(embed.fields);
+};
 
-    embed.fields[embed.fields.length - 2].value = '```' + `${pad(count, 4)}` + '```';
+export const updateMessageEmbed = async (message: Message, embed: EmbedBuilder) => {
 
-    const msg = componentContext.message;
+    logger.data('update Embed', embed);
 
-    logger.info('Updated embed');
-
-    await msg.edit({ embeds:[embed] });
+    await message.edit({ embeds:[embed] });
 };

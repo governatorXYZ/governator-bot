@@ -15,7 +15,7 @@ import {
     PollOptionDto,
     StrategyConfig,
     DiscordAccountResponseDto,
-} from 'governator-api';
+} from 'governator-sdk';
 import { ClientConfigDiscordDto } from '../../types/governator-api/GovernatorApiTypes';
 
 const logger = createLogger('CreatePoll');
@@ -124,7 +124,6 @@ export default async (poll: PollResponseDto, client: Client): Promise<void> => {
 };
 
 const updatePoll = async (poll: PollResponseDto, messageId: string): Promise<void> => {
-    // const pollPatchEndpoint = `${Api.getBasePath()}/poll/update/${poll._id}`;
 
     poll.client_config.forEach((conf) => {
         if (conf.provider_id === 'discord') {
@@ -162,7 +161,7 @@ const pollEmbed = async (pollEmbedParams: PollEmbedParams): Promise<EmbedBuilder
             iconURL: (pollEmbedParams.author as Discord.User).avatarURL() as string,
         })
         .setFooter({ text: pollEmbedParams.poll._id as string })
-        .setThumbnail(process.env.GOVERNATOR_LOGO_URL?.toString() as string)
+        // .setThumbnail(process.env.GOVERNATOR_LOGO_URL?.toString() as string)
         .addFields([
             { name: '\u200B', value: '\u200B', inline: false },
         ]);
@@ -170,7 +169,7 @@ const pollEmbed = async (pollEmbedParams: PollEmbedParams): Promise<EmbedBuilder
     logger.info(`poll end time: ${pollEmbedParams.poll.end_time}, timestamp: ${ts}`);
 
     (pollEmbedParams.poll.poll_options as PollOptionDto[]).forEach((option: any, index: number) => {
-        msgEmbed.addFields([{ name: `${pollEmbedParams.emojiList[index]} ${option.poll_option_name}`, value: '\u200B', inline: false }]);
+        msgEmbed.addFields([{ name: `${pollEmbedParams.emojiList[index]}  ${option.poll_option_name}`, value: '\u200B', inline: false }]);
     });
 
     const clientConfig = pollEmbedParams.poll.client_config.find(config => config.provider_id === 'discord') as ClientConfigDiscordDto;
