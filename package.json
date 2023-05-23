@@ -67,7 +67,7 @@
     },
     "engines": {
         "yarn": "1.x",
-        "node": "16.17.x"
+        "node": "18.13.x"
     },
     "engineStrict": true
 }
