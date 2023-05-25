@@ -5,7 +5,7 @@
     "main": "app.js",
     "private": true,
     "scripts": {
-        "build": "tsc -p tsconfig.json --extendedDiagnostics",
+        "build": "tsc -p tsconfig.json",
         "test": "jest",
         "qa": "node -r dotenv/config --trace-warnings dist/app/app.js dotenv_config_path=.env.qa",
         "dev": "nodemon -r dotenv/config --inspect --trace-warnings dist/app/app.js dotenv_config_path=.env.dev",
