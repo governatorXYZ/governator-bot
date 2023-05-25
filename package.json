@@ -8,7 +8,7 @@
         "build": "tsc -p tsconfig.json",
         "test": "jest",
         "qa": "node -r dotenv/config --trace-warnings dist/app/app.js dotenv_config_path=.env.qa",
-        "dev": "nodemon -r dotenv/config --trace-warnings dist/app/app.js dotenv_config_path=.env.dev",
+        "dev": "nodemon -r dotenv/config --inspect --trace-warnings dist/app/app.js dotenv_config_path=.env.dev",
         "prod": "node -r dotenv/config --trace-warnings dist/app/app.js dotenv_config_path=.env.prod",
         "prestart": "yarn install && yarn build",
         "pretest": "yarn install && yarn build",
@@ -42,7 +42,6 @@
     },
     "homepage": "https://github.com/governatorXYZ/governator-bot/",
     "dependencies": {
-        "@types/node": "18",
         "axios": "^1.1.3",
         "discord.js": "14.11.0",
         "dotenv": "^16.0.3",
@@ -54,6 +53,7 @@
         "winston": "^3.7.2"
     },
     "devDependencies": {
+        "@types/node": "18",
         "@types/eventsource": "^1.1.10",
         "@types/jest": "^29.5.1",
         "@typescript-eslint/eslint-plugin": "^5.10.0",
