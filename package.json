@@ -5,12 +5,11 @@
     "main": "app.js",
     "private": true,
     "scripts": {
-        "build": "tsc -p tsconfig.json",
+        "build": "tsc -p tsconfig.json --extendedDiagnostics",
         "test": "jest",
         "qa": "node -r dotenv/config --trace-warnings dist/app/app.js dotenv_config_path=.env.qa",
         "dev": "nodemon -r dotenv/config --inspect --trace-warnings dist/app/app.js dotenv_config_path=.env.dev",
         "prod": "node -r dotenv/config --trace-warnings dist/app/app.js dotenv_config_path=.env.prod",
-        "prestart": "yarn install && yarn build",
         "pretest": "yarn install && yarn build",
         "start": "node --trace-warnings -r dotenv/config dist/app/app.js",
         "lint": "eslint ./src/app/**/*.ts --ext .ts",
@@ -53,9 +52,9 @@
         "winston": "^3.7.2"
     },
     "devDependencies": {
-        "@types/node": "18",
         "@types/eventsource": "^1.1.10",
         "@types/jest": "^29.5.1",
+        "@types/node": "18",
         "@typescript-eslint/eslint-plugin": "^5.10.0",
         "@typescript-eslint/parser": "^5.10.0",
         "eslint": "^8.7.0",
