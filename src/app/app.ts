@@ -46,6 +46,10 @@ creator
     .registerCommandsIn(path.join(__dirname, 'commands'))
     .syncCommands();
 
+
+// reload client
+client.destroy();
+
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 function initializeClient(): Client {

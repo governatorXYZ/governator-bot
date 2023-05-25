@@ -152,9 +152,9 @@ const formatVotePower = (poll: PollResponseDto, votePower: string) => {
     const strategyType = poll.strategy_config ? poll.strategy_config[0].strategy_type : '';
     if (strategyType === strategyTypes.STRATEGY_TYPE_TOKEN_WEIGHTED) {
 
-        if (BigInt(votePower) > BigInt('10000')) {
+        if (ethers.BigNumber.from(votePower).gt(ethers.BigNumber.from('10000'))) {
 
-            return truncate(ethers.formatEther(BigInt(votePower)), 2);
+            return truncate(ethers.utils.formatEther(ethers.BigNumber.from(votePower)), 2);
         }
     }
 
