@@ -119,3 +119,6 @@ build
 globalConfig.json
 
 https://discord.com/api/oauth2/authorize?client_id=901799442502516766&permissions=4027055222&scope=bot%20&applications.commands
+
+.yarn/
+.yarnrc.yml
