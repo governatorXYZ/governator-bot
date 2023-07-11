@@ -11,7 +11,7 @@ export default class implements DiscordEvent {
         try {
             this.logger.info('Starting up the bot...');
 
-            client.user?.setActivity({ name: process.env.DISCORD_BOT_ACTIVITY });
+            client.user?.setActivity({ name: process.env.DISCORD_BOT_ACTIVITY ?? 'Voting with Tokens' });
             client.guilds.cache.forEach(async (guild: Guild) => {
                 this.logger.info(`Bot is active for: ${guild.id}, ${guild.name}`);
                 await guild.channels.fetch();
